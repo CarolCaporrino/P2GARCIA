@@ -1,0 +1,45 @@
+Usuario
+    nome    Text
+    email   Text
+    senha   Text
+    UniqueUsuario email
+    deriving Show
+
+Aluno json
+    nome    Text
+    idade   Int
+    ra      Text
+    UniqueRA ra
+    deriving Show
+    
+
+Matricula json
+    alunoid         AlunoId
+    discid          DisciplinaId
+    matriculadoEm   Day
+    deriving Show
+    
+Disciplina json
+    nome            Text
+    codigo          Text
+    cargaHoraria    Int
+    deriving Show
+    
+
+
+
+-- By default this file is used in Model.hs (which is imported by Foundation.hs)
+ 
+-- CRIA A TABELA Aluno E UM TIPO NO HASKELL
+ 
+-- type AlunoNome = Text
+-- type AlunoIdade = Int
+-- type AlunoRa = Text
+
+-- data Aluno = Aluno {
+--     alunoNome :: AlunoNome,
+--     alunoIdade :: AlunoIdade
+--     alunoRa :: AlunoRa
+--}
+                        
+--data AlunoId = AlunoId {alunoID :: Int}

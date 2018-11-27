@@ -1,0 +1,20 @@
+    <h1>
+        Disciplinas matriculadas por #{alunoNome aluno}
+    <table class="table">
+               <thead>
+                    <tr>
+                        <th>
+                            NOME
+                        <th>
+                            CODIGO
+                        <th>
+                            CARGA
+                <tbody>
+                    $forall (Entity did disciplina) <- disciplinas
+                        <tr>
+                            <td>
+                                #{disciplinaNome disciplina}
+                            <td>
+                                #{disciplinaCodigo disciplina}
+                            <td>
+                                #{disciplinaCargaHoraria disciplina}

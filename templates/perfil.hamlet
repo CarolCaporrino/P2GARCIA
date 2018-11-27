@@ -1,0 +1,5 @@
+<h1> ALUNO #{show $ fromSqlKey alunoid} </h1>
+<h2>
+    NOME: #{alunoNome aluno}
+    RA: #{alunoRa aluno}
+    IDADE: #{alunoIdade aluno}

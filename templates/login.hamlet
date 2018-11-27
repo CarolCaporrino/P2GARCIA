@@ -1,0 +1,8 @@
+$maybe mensa <- msg
+    <div class="alert alert-danger">
+        #{mensa}
+
+<div class="container">
+    <form action=@{LoginR} method=post enctype=#{enctype}>
+        ^{widgetLogin}
+        <input type="submit" value="Login">

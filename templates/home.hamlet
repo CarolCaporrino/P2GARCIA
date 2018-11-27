@@ -1,0 +1,40 @@
+$maybe mensa <- msg
+    <div class="alert alert-success">
+        #{mensa}
+        
+<h1>
+    OLA MUNDO!
+
+<div class="container">
+    <div class="jumbotron">
+        DIV DENTRO DE DIV
+    
+    <nav class="navbar">
+        <div class="collapse navbar-collapse">
+            <ul>
+                <li>
+                    <a href=@{AlunoR}>
+                        Perfil aluno
+                <li>
+                    <a href=@{ListaAlunoR}>
+                        Lista aluno
+                <li> 
+                    <a href=@{UsuarioR}>
+                        Cadastre-se
+                $maybe _ <- sess
+                    <li>
+                        <form action=@{LogoutR} method=post>
+                            <input type="submit" value="Logout">                        
+                $nothing
+                    <li>
+                        <a href=@{LoginR}>
+                            Login
+
+    <img src=@{StaticR imgs_coruja_jpg}>
+
+    <button onclick="teste()" class="btn-primary">
+        OK
+
+<footer class="page-footer">
+    ^{widgetFooter}
+        
