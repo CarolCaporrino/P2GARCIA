@@ -1,6 +1,0 @@
-Matricula de #{alunoNome aluno}
-
-<div class="jumbotron" enctype=#{enctype}>
-    <form action=@{MatriculaR alunoid} method=post>
-        ^{widgetForm}
-        <input type="submit" value="Enviar"> 

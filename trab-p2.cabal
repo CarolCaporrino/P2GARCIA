@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7b55eedfa67da3ccb1c6a112487f4794ce4e3abc8e397818ed77fbf0bb8e2c57
+-- hash: 2efdfb83448f1ab2738e0eafc211a71c62000c8fb07c97589c5b4846f31136d9
 
 name:           trab-p2
 version:        0.0.0
@@ -23,14 +23,10 @@ library
   exposed-modules:
       Application
       Foundation
-      Handler.Admin
-      Handler.Aluno
       Handler.Common
-      Handler.Disciplina
+      Handler.Funcionario
       Handler.Home
       Handler.Login
-      Handler.Matricula
-      Handler.Usuario
       Import
       Import.NoFoundation
       Model

@@ -1,5 +1,0 @@
-<div class="jumbotron" enctype=#{enctype}>
-    <form action=@{AlunoR} method=post>
-        ^{widgetForm}
-        <input type="submit" value="Enviar">
-            

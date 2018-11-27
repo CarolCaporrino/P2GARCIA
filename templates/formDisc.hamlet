@@ -1,9 +1,0 @@
-$maybe msg <- mensa 
-    <div class="alert alert-success">
-        #{msg}
-
-<div class="jumbotron" enctype=#{enctype}>
-    <form action=@{DisciplinaR} method=post>
-        ^{widgetForm}
-        <input type="submit" value="Enviar">
-            
