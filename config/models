@@ -42,3 +42,32 @@ EspecMedico json
     timestamp   UTCTime
     UniqueEspec medicoid especid
     deriving Show
+    
+Paciente json
+    nome            Text
+    cpf             Text
+    rg              Text
+    nasc            Day
+    telefone        Text Maybe
+    celular         Text Maybe
+    email           Text
+    pais            Text
+    cep             Text
+    estado          Text
+    cidade          Text
+    bairro          Text
+    logradouro      Text
+    numero          Text
+    complemento     Text Maybe
+    insertedTimestamp       UTCTime
+    lastUpdatedTimestamp    UTCTime
+    UniquePacCpf cpf
+    deriving Show
+    
+EntradaProntuario json
+    pacienteid      PacienteId
+    medicoid        MedicoId
+    especid         EspecializacaoId Maybe
+    conteudo        Text
+    timestamp       UTCTime
+    deriving Show
