@@ -23,3 +23,22 @@ Usuario json
     UniqueUserUsername username
     UniqueEmail email
     deriving Show
+    
+Medico json
+    userid      UsuarioId
+    crm         Text
+    ativo       Bool
+    UniqueUserId userid
+    deriving Show
+    
+Especializacao json
+    nome        Text
+    timestamp       UTCTime
+    deriving Show
+    
+EspecMedico json
+    medicoid    MedicoId
+    especid     EspecializacaoId
+    timestamp   UTCTime
+    UniqueEspec medicoid especid
+    deriving Show
