@@ -71,3 +71,15 @@ EntradaProntuario json
     conteudo        Text
     timestamp       UTCTime
     deriving Show
+    
+    
+Consulta json
+    pacienteid      PacienteId
+    medicoid        MedicoId
+    especid         EspecializacaoId
+    inicio          UTCTime
+    termino         UTCTime
+    observacoes     Text
+    insertedTimestamp       UTCTime
+    lastUpdatedTimestamp    UTCTime
+    deriving Show
