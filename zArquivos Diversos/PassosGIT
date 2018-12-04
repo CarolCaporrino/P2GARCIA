@@ -1,0 +1,20 @@
+0) Apagar .git se houver
+1) git init
+2) Setar repo remoto
+git remote add origin <seu_repo>
+=========== DAQUI EM DIANTE =====
+3) colocar aquivo no repo local
+git add .
+4) efetuar transações (local)
+git commit -m "Meu primeiro commit"
+5) mandar commit para o remoto
+git push origin master
+==================================
+
+====== PARA DESENVOLVER COM O COLEGA ====
+
+1a) Cloar repo (primeira vez)
+git clone <repo>
+
+SEMPRE UE HOUVER ATUALIZCOES DO COLEGA
+1b) git pull origin master

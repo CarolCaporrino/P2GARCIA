@@ -1,0 +1,12 @@
+static -> front-end estático: css, js, imagens
+templates -> front-end dinâmico: html, css, js
+app -> main da aplicacao (N USADO)
+config -> arquivo de rotas, definicao de banco de dados e configuracao de bd
+    routes -> mecanismo de rotas  
+    models -> tabelas do banco
+    settings.yml -> Endereco do banco, porta, etc...
+src -> codigo fonte do site
+    Handler -> vai as funcoes que dependem das rotas
+               exemplo: getHomeR e afins...
+    Application.hs -> imports de arquivos no Handler
+    O resto n mexer

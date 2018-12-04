@@ -1,0 +1,56 @@
+Host
+ec2-23-21-65-173.compute-1.amazonaws.com
+
+Database
+dbf2mkomamj15f
+
+User
+kcxhfbblqsswvf
+
+Port
+5432
+
+Password
+7c299ebeae5daa0d1842587f6e9246eb54e419c6752b45818001f0b7589d23ce
+
+URI
+postgres://kcxhfbblqsswvf:7c299ebeae5daa0d1842587f6e9246eb54e419c6752b45818001f0b7589d23ce@ec2-23-21-65-173.compute-1.amazonaws.com:5432/dbf2mkomamj15f
+
+Heroku CLI
+heroku pg:psql postgresql-polished-97237 --app haskell-p2
+
+
+
+--ACESSAR O PSQL--
+psql -h ec2-23-21-65-173.compute-1.amazonaws.com -U kcxhfbblqsswvf -d dbf2mkomamj15f
+
+psql -h ec2-23-21-65-173.compute-1.amazonaws.com 
+     -U kcxhfbblqsswvf 
+     -d dbf2mkomamj15f
+
+     
+SENHA: 7c299ebeae5daa0d1842587f6e9246eb54e419c6752b45818001f0b7589d23ce
+
+--Ver colunas e tipos de uma tabela:
+select column_name, data_type from information_schema.columns
+where table_name = 'paciente';
+
+
+--Resetar banco (no psql):
+drop owned by kcxhfbblqsswvf;
+create schema public;
+
+
+
+--HEROKU--
+
+--Backup (no terminal mesmo)
+heroku login
+(colocar suas credenciais do heroku (só precisa fazer uma vez))
+
+heroku pg:backups:capture --app haskell-p2
+(anotar o código que aparecer "b***")
+
+
+--Restaurar (exemplo)
+heroku pg:backups:restore b001 --app haskell-p2

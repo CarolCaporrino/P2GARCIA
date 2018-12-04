@@ -1,0 +1,19 @@
+============= INSTALL YESOD =====
+1) criar uma nova máquina
+1') Não colocar time / selecionar blank na linguagem
+2) Aumentar a Memory para 1GB e o Disk pra 5GB (Canto superior esquerdo após ter criado a máquina)
+3) Abrir um console e digitar:
+
+4) curl -sSL https://get.haskellstack.org/ | sh
+
+5) git clone https://github.com/romefeller/yesodvazio.git
+
+2') renomear pasta "yesodvazio" (esse é o que ele colocou "helloapp") 
+
+2'') cd nome_pasta (para entrar na nova pasta)
+
+3) stack install (UMA VEZ POR MAQUINA) (se você der stack install fora da pasta, exclui a máquina e recomeça do 1)
+
+3') stack build (toda vez que der erro de memória) (se o erro for espaço do disco você provavelmente deu stack install em dois lugares diferentes, recomeça do 1)
+
+4) acaba quando der um erro igual o da foto (ExitFaliure 1)

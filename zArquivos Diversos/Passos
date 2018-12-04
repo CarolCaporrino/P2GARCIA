@@ -1,0 +1,8 @@
+Passos (CADA TABELA NOVA):
+1) Criar tabela
+2) Criar arquivo no src/Handler 
+com o mesmo nome da tabela (renomear)
+3) Atualizar sempre o Application.hs
+4) Mexer na rota e no arquivo correspondente
+/aluno AlunoR POST virará
+postAlunoR em Aluno.hs
