@@ -23,6 +23,7 @@ Usuario json
     UniqueUserUsername username
     UniqueEmail email
     deriving Show
+
     
 Medico json
     userid      UsuarioId
