@@ -6,6 +6,9 @@
 
 /funcionario        FuncionarioR        POST
 
+
+/funcionario/#UsuarioId/id      SingleFuncionarioR  GET
+
 /paciente PacienteR POST 
 
 

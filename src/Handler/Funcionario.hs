@@ -80,3 +80,5 @@ createFuncionario agora funjson =
         1 -> "Admin"        :: Text
         2 -> "Secretaria"   :: Text
         _ -> "Secretaria"   :: Text
+        
+
