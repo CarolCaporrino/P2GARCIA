@@ -1,13 +1,14 @@
--- This file has been generated from package.yaml by hpack version 0.28.2.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.1.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2efdfb83448f1ab2738e0eafc211a71c62000c8fb07c97589c5b4846f31136d9
+-- hash: 8e1e7d26b9456426e35e0f53fe633ee575e1880f3ea6a3821ee3b9d2f76a4895
 
 name:           trab-p2
 version:        0.0.0
 build-type:     Simple
-cabal-version:  >= 1.10
 
 flag dev
   description: Turn on development settings, like auto-reload templates.
@@ -37,8 +38,11 @@ library
   hs-source-dirs:
       src
   build-depends:
-      aeson >=0.6 && <1.3
+      MissingH
+    , aeson >=0.6 && <1.3
+    , aeson-casing
     , base >=4.8.2.0 && <4.9 || >=4.9.1.0 && <5
+    , bcrypt
     , bytestring >=0.9 && <0.11
     , case-insensitive
     , classy-prelude >=0.10.2
@@ -53,11 +57,13 @@ library
     , hjsmin >=0.1 && <0.3
     , http-conduit >=2.1 && <2.3
     , http-types
+    , jose-jwt
     , monad-control >=0.3 && <1.1
     , monad-logger >=0.3 && <0.4
     , persistent >=2.0 && <2.8
     , persistent-postgresql >=2.1.1 && <2.8
     , persistent-template >=2.0 && <2.8
+    , random-strings
     , safe
     , shakespeare >=2.0 && <2.1
     , template-haskell
@@ -91,8 +97,11 @@ executable trab-p2
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      aeson >=0.6 && <1.3
+      MissingH
+    , aeson >=0.6 && <1.3
+    , aeson-casing
     , base >=4.8.2.0 && <4.9 || >=4.9.1.0 && <5
+    , bcrypt
     , bytestring >=0.9 && <0.11
     , case-insensitive
     , classy-prelude >=0.10.2
@@ -107,11 +116,13 @@ executable trab-p2
     , hjsmin >=0.1 && <0.3
     , http-conduit >=2.1 && <2.3
     , http-types
+    , jose-jwt
     , monad-control >=0.3 && <1.1
     , monad-logger >=0.3 && <0.4
     , persistent >=2.0 && <2.8
     , persistent-postgresql >=2.1.1 && <2.8
     , persistent-template >=2.0 && <2.8
+    , random-strings
     , safe
     , shakespeare >=2.0 && <2.1
     , template-haskell
