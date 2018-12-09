@@ -3,4 +3,9 @@
 /favicon.ico FaviconR GET
 /robots.txt RobotsR GET
 
+
 /funcionario        FuncionarioR        POST
+
+/paciente PacienteR POST 
+
+

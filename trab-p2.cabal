@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8e1e7d26b9456426e35e0f53fe633ee575e1880f3ea6a3821ee3b9d2f76a4895
+-- hash: c06020bfc6a2127678d8363132cc39202ffe3181ec8d7b12dc7ffea1b4094542
 
 name:           trab-p2
 version:        0.0.0
@@ -28,6 +28,7 @@ library
       Handler.Funcionario
       Handler.Home
       Handler.Login
+      Handler.Paciente
       Import
       Import.NoFoundation
       Model
