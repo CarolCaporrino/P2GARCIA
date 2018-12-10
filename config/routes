@@ -18,3 +18,4 @@
 /consulta/#ConsultaId/id        SingleConsultaR     GET
 /consulta/list                  ListConsultaR       GET
 /consulta/#MedicoId/medico      MedConsultaR        GET
+/consulta/#ConsultaId/apagar    ApagarConsultaR     DELETE

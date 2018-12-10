@@ -136,3 +136,15 @@ getMedConsultaR medid = do
     eConsultas <- runDB $ selectList [ConsultaMedicoid ==. medid] [Asc ConsultaId]
     consjsons <- return $ map createConsGetE eConsultas
     sendStatusJSON ok200 (object ["resp" .= consjsons])
+    
+    
+--DELETE
+
+--Função que receberá o DELETE com um Id e apaga a consulta do banco de dados
+deleteApagarConsultaR :: ConsultaId -> Handler TypedContent
+deleteApagarConsultaR consid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    _ <- runDB $ get404 consid
+    runDB $ delete consid
+    sendStatusJSON ok200 (object ["resp" .= ("Consulta deletada"::Text)])
+
