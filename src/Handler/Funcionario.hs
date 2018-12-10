@@ -123,7 +123,7 @@ instance FromJSON FunResJSON where
 getSingleFuncionarioR :: UsuarioId -> Handler TypedContent
 getSingleFuncionarioR funid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
-     usuario <- runDB $ get404 usuid
+    usuario <- runDB $ get404 usuid
     if (usuarioTipo usuario == "Medico") then
         sendStatusJSON badRequest400 (object ["resp" .= ("Não é funcionário"::Text)])
     else do
@@ -217,6 +217,20 @@ instance ToJSON FunAltJSON where
    toJSON = genericToJSON $ aesonPrefix snakeCase
 instance FromJSON FunAltJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
+   
+--Função que receberá o PUT com um Id e as novas informações do funcionario, colocando no banco com o mesmo id
+putAlterarFuncionarioR :: UsuarioId -> Handler TypedContent
+putAlterarFuncionarioR usuid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    funjson <- requireJsonBody :: Handler FunAltJSON
+    usuario <- runDB $ get404 usuid
+    if (usuarioTipo usuario == "Medico") then
+        sendStatusJSON badRequest400 (object ["resp" .= ("Não é funcionário"::Text)])
+    else do
+        agora <- liftIO $ getCurrentTime
+        altFuncionario <- return $ alterFuncionario funjson usuario agora 
+        runDB $ replace usuid altFuncionario
+        sendStatusJSON ok200 (object ["resp" .= ("Funcionario alterado"::Text)])
    
 --Cria um Usuario com as informações novas, porém mantendo a data de criação, o username e a senha antigos.
 alterFuncionario :: FunAltJSON -> Usuario -> UTCTime -> Usuario
