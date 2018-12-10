@@ -128,3 +128,9 @@ createPacGet pacienteid pac =
     where
     istamp = utcToZonedTime utc $ pacienteInsertedTimestamp pac
     ustamp = utcToZonedTime utc $ pacienteLastUpdatedTimestamp pac
+    
+createPacGetE :: Entity Paciente -> PacResJSON
+createPacGetE ePaciente = createPacGet pacienteid paciente
+where
+pacienteid = entityKey ePaciente
+paciente = entityVal ePaciente
