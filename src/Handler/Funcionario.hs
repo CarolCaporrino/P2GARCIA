@@ -112,9 +112,12 @@ instance FromJSON FunResJSON where
 getSingleFuncionarioR :: UsuarioId -> Handler TypedContent
 getSingleFuncionarioR funid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
-    funcionario <- runDB $ get404 funid
-    funjson <- return $ createFunGet funid funcionario
-    sendStatusJSON ok200 (object ["resp" .= funjson])
+     usuario <- runDB $ get404 usuid
+    if (usuarioTipo usuario == "Medico") then
+        sendStatusJSON badRequest400 (object ["resp" .= ("Não é funcionário"::Text)])
+    else do
+        funjson <- return $ createFunGet usuid usuario
+        sendStatusJSON ok200 (object ["resp" .= funjson])
     
 createFunGet :: UsuarioId -> Usuario -> FunResJSON
 createFunGet funcid usu =
