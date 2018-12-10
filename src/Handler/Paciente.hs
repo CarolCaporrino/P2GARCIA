@@ -16,7 +16,10 @@ import Data.Time
 import Data.Aeson
 import Data.Aeson.Casing
 
+--POST
 
+
+--Criando o tipo JSON para receber um novo paciente
 data PacReqJSON = PacReqJSON {
     pacreqNome          :: Text,
     pacreqCpf           :: Text,
@@ -33,13 +36,14 @@ data PacReqJSON = PacReqJSON {
     pacreqNumero        :: Text,
     pacreqComplemento   :: Maybe Text
 } deriving (Show, Read, Generic)
-
+--Criando instância de ToJSON e FromJSON
 instance ToJSON PacReqJSON where
    toJSON = genericToJSON $ aesonPrefix snakeCase
 instance FromJSON PacReqJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
 
 
+--Função que receberá o POST de paciente
 postPacienteR :: Handler TypedContent
 postPacienteR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
@@ -49,7 +53,8 @@ postPacienteR = do
     pacienteid <- runDB $ insert paciente
     sendStatusJSON created201 (object ["id" .= pacienteid])
     
-    
+
+--Função que pega o tempo de agora e o JSON postado para criar o tipo paciente (usado no banco)    
 createPaciente :: UTCTime -> PacReqJSON -> Paciente
 createPaciente agora pacjson = 
     Paciente {
@@ -72,6 +77,9 @@ createPaciente agora pacjson =
         pacienteLastUpdatedTimestamp    = agora
     }
     
+--GET 1
+    
+--Criando o tipo JSON que mandará o paciente selecionado para o front    
 data PacResJSON = PacResJSON {
     pacresId            :: PacienteId,
     pacresNome          :: Text,
@@ -96,14 +104,17 @@ instance ToJSON PacResJSON where
    toJSON = genericToJSON $ aesonPrefix snakeCase
 instance FromJSON PacResJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
-   
+  
+
+--Função que receberá o GET e responderá com o JSON do paciente
 getSinglePacienteR :: PacienteId -> Handler TypedContent
 getSinglePacienteR pacid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     paciente <- runDB $ get404 pacid
     pacjson <- return $ createPacGet pacid paciente
     sendStatusJSON ok200 (object ["resp" .= pacjson])
-    
+
+--Função que recebe um id e o tipo Paciente (do banco) para criar o JSON de resposta
 createPacGet :: PacienteId -> Paciente -> PacResJSON
 createPacGet pacienteid pac =
     PacResJSON {
@@ -128,3 +139,21 @@ createPacGet pacienteid pac =
     where
     istamp = utcToZonedTime utc $ pacienteInsertedTimestamp pac
     ustamp = utcToZonedTime utc $ pacienteLastUpdatedTimestamp pac
+
+
+--GET LIST
+
+--Função que pegará uma "Entidade Paciente" (tipo que vem do banco (id+Paciente)) e criará um JSON de resposta
+createPacGetE :: Entity Paciente -> PacResJSON
+createPacGetE ePaciente = createPacGet pacienteid paciente
+    where
+    pacienteid = entityKey ePaciente
+    paciente = entityVal ePaciente
+
+--Função que receberá o GET para a listagem de todos os pacientes
+getListPacienteR :: Handler TypedContent
+getListPacienteR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    ePacientes <- runDB $ selectList [] [Asc PacienteId]
+    pacjsons <- return $ map createPacGetE ePacientes
+    sendStatusJSON ok200 (object ["resp" .= pacjsons])
