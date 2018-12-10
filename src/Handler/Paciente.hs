@@ -192,3 +192,17 @@ alterPaciente pacjson paciente agora =
         pacienteInsertedTimestamp       = pacienteInsertedTimestamp paciente,
         pacienteLastUpdatedTimestamp    = agora
     }
+    
+--PUT
+
+--Função que receberá o PUT com um Id e as novas informações do paciente, colocando no banco com o mesmo id
+putAlterarPacienteR :: PacienteId -> Handler TypedContent
+putAlterarPacienteR pacid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    paciente <- runDB $ get404 pacid
+    pacjson <- requireJsonBody :: Handler PacReqJSON
+    agora <- liftIO $ getCurrentTime
+    altPaciente <- return $ alterPaciente pacjson paciente agora
+    runDB $ replace pacid altPaciente
+    sendStatusJSON ok200 (object ["resp" .= ("Paciente alterado"::Text)])
+    
