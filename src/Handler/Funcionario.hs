@@ -121,7 +121,7 @@ instance FromJSON FunResJSON where
   
 --Função que receberá o GET e responderá com o JSON do funcionario   
 getSingleFuncionarioR :: UsuarioId -> Handler TypedContent
-getSingleFuncionarioR funid = do
+getSingleFuncionarioR usuid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     usuario <- runDB $ get404 usuid
     if (usuarioTipo usuario == "Medico") then
