@@ -72,7 +72,7 @@ createPaciente agora pacjson =
         pacienteLastUpdatedTimestamp    = agora
     }
     
-    data PacResJSON = PacResJSON {
+data PacResJSON = PacResJSON {
     pacresId            :: PacienteId,
     pacresNome          :: Text,
     pacresCpf           :: Text,
@@ -96,3 +96,35 @@ instance ToJSON PacResJSON where
    toJSON = genericToJSON $ aesonPrefix snakeCase
 instance FromJSON PacResJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
+   
+getSinglePacienteR :: PacienteId -> Handler TypedContent
+getSinglePacienteR pacid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    paciente <- runDB $ get404 pacid
+    pacjson <- return $ createPacGet pacid paciente
+    sendStatusJSON ok200 (object ["resp" .= pacjson])
+    
+createPacGet :: PacienteId -> Paciente -> PacResJSON
+createPacGet pacienteid pac =
+    PacResJSON {
+        pacresId            = pacienteid,
+        pacresNome          = pacienteNome pac,
+        pacresCpf           = pacienteCpf pac,
+        pacresRg            = pacienteRg pac,
+        pacresNasc          = pacienteNasc pac,
+        pacresTelefone      = pacienteTelefone pac,
+        pacresCelular       = pacienteCelular pac,
+        pacresEmail         = pacienteEmail pac,
+        pacresCep           = pacienteCep pac,
+        pacresEstado        = pacienteEstado pac,
+        pacresCidade        = pacienteCidade pac,
+        pacresBairro        = pacienteBairro pac,
+        pacresLogradouro    = pacienteLogradouro pac,
+        pacresNumero        = pacienteNumero pac,
+        pacresComplemento   = pacienteComplemento pac,
+        pacresInsertedTimestamp     = istamp,
+        pacresLastUpdatedTimestamp  = ustamp
+    }
+    where
+    istamp = utcToZonedTime utc $ pacienteInsertedTimestamp pac
+    ustamp = utcToZonedTime utc $ pacienteLastUpdatedTimestamp pac
