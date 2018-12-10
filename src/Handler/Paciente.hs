@@ -71,3 +71,28 @@ createPaciente agora pacjson =
         pacienteInsertedTimestamp       = agora,
         pacienteLastUpdatedTimestamp    = agora
     }
+    
+    data PacResJSON = PacResJSON {
+    pacresId            :: PacienteId,
+    pacresNome          :: Text,
+    pacresCpf           :: Text,
+    pacresRg            :: Text,
+    pacresNasc          :: Day,
+    pacresTelefone      :: Maybe Text,
+    pacresCelular       :: Maybe Text,
+    pacresEmail         :: Text,
+    pacresCep           :: Text,
+    pacresEstado        :: Text,
+    pacresCidade        :: Text,
+    pacresBairro        :: Text,
+    pacresLogradouro    :: Text,
+    pacresNumero        :: Text,
+    pacresComplemento   :: Maybe Text,
+    pacresInsertedTimestamp     :: ZonedTime,
+    pacresLastUpdatedTimestamp  :: ZonedTime
+} deriving (Show, Read, Generic)
+
+instance ToJSON PacResJSON where
+   toJSON = genericToJSON $ aesonPrefix snakeCase
+instance FromJSON PacResJSON where
+   parseJSON = genericParseJSON $ aesonPrefix snakeCase
