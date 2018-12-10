@@ -148,3 +148,32 @@ deleteApagarConsultaR consid = do
     runDB $ delete consid
     sendStatusJSON ok200 (object ["resp" .= ("Consulta deletada"::Text)])
 
+
+
+--PUT
+
+--Função que receberá o PUT com um Id e as novas informações da consulta, colocando no banco com o mesmo id
+putAlterarConsultaR :: ConsultaId -> Handler TypedContent
+putAlterarConsultaR consid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    consulta <- runDB $ get404 consid
+    consjson <- requireJsonBody :: Handler ConsReqJSON
+    agora <- liftIO $ getCurrentTime
+    altConsulta <- return $ alterConsulta consjson consulta agora
+    runDB $ replace consid altConsulta
+    sendStatusJSON ok200 (object ["resp" .= ("Consulta alterada"::Text)])
+    
+
+--Cria uma Consulta com as informações novas, porém mantendo a data de criação antiga.
+alterConsulta :: ConsReqJSON -> Consulta -> UTCTime -> Consulta
+alterConsulta consjson consulta agora = do
+    Consulta {
+        consultaPacienteid      = consreqPacienteid consjson,
+        consultaMedicoid        = consreqMedicoid consjson,
+        consultaEspecid         = consreqEspecid consjson,
+        consultaInicio          = zonedTimeToUTC $ consreqInicio consjson,
+        consultaTermino         = zonedTimeToUTC $ consreqTermino consjson,
+        consultaObservacoes     = consreqObservacoes consjson,
+        consultaInsertedTimestamp       = consultaInsertedTimestamp consulta,
+        consultaLastUpdatedTimestamp    = agora
+    }

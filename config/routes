@@ -19,3 +19,4 @@
 /consulta/list                  ListConsultaR       GET
 /consulta/#MedicoId/medico      MedConsultaR        GET
 /consulta/#ConsultaId/apagar    ApagarConsultaR     DELETE
+/consulta/#ConsultaId/alterar   AlterarConsultaR    PUT
