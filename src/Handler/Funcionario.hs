@@ -17,6 +17,8 @@ import Data.Aeson
 import Data.Aeson.Casing
 
 --POST FUNCIONARIO
+
+--Função que receberá o POST de funcionario
 postFuncionarioR :: Handler TypedContent
 postFuncionarioR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
@@ -26,6 +28,7 @@ postFuncionarioR = do
     funcionarioid <- runDB $ insert funcionario
     sendStatusJSON created201 (object ["id" .= funcionarioid])
     
+--Criando o tipo JSON para receber um novo funcionario
 data FunReqJSON = FunReqJSON {
     funreqUsername      :: Text,
     funreqPassword      :: Text,
@@ -46,11 +49,14 @@ data FunReqJSON = FunReqJSON {
     funreqComplemento   :: Maybe Text
 } deriving (Show, Read, Generic)
 
+
+--Criando instância de ToJSON e FromJSON
 instance ToJSON FunReqJSON where
    toJSON = genericToJSON $ aesonPrefix snakeCase
 instance FromJSON FunReqJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
     
+--Função que pega o tempo de agora e o JSON postado para criar o tipo usuario (usado no banco) 
 createFuncionario :: UTCTime -> FunReqJSON -> Usuario
 createFuncionario agora funjson = 
     Usuario {
@@ -81,6 +87,10 @@ createFuncionario agora funjson =
         2 -> "Secretaria"   :: Text
         _ -> "Secretaria"   :: Text
         
+        
+--GET 1 FUNCIONARIO
+
+--Criando o tipo JSON que mandará o funcioanrio selecionado para o front  
 data FunResJSON = FunResJSON {
     funresId            :: UsuarioId,
     funresUsername      :: Text,
@@ -108,7 +118,8 @@ instance ToJSON FunResJSON where
 instance FromJSON FunResJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
   
-   
+  
+--Função que receberá o GET e responderá com o JSON do funcionario   
 getSingleFuncionarioR :: UsuarioId -> Handler TypedContent
 getSingleFuncionarioR funid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
@@ -119,6 +130,7 @@ getSingleFuncionarioR funid = do
         funjson <- return $ createFunGet usuid usuario
         sendStatusJSON ok200 (object ["resp" .= funjson])
     
+--Função que recebe um id e o tipo Usuario (do banco) para criar o JSON de resposta 
 createFunGet :: UsuarioId -> Usuario -> FunResJSON
 createFunGet funcid usu =
     FunResJSON {
@@ -149,3 +161,20 @@ createFunGet funcid usu =
         "Admin" -> 1
         "Secretaria" -> 2
         _ -> 2
+
+--GET LIST
+
+--Função que pegará uma "Entidade Usuario" (tipo que vem do banco (id+Usuario)) e criará um JSON de resposta
+createFunGetE :: Entity Usuario -> FunResJSON
+createFunGetE eFuncionario = createFunGet funcionarioid funcionario
+    where
+    funcionarioid = entityKey eFuncionario
+    funcionario = entityVal eFuncionario
+
+--Função que receberá o GET para a listagem de todos os funcionarios
+getListFuncionarioR :: Handler TypedContent
+getListFuncionarioR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    eFuncionarios <- runDB $ selectList [UsuarioTipo !=. "Medico"] [Asc UsuarioId]
+    funjsons <- return $ map createFunGetE eFuncionarios
+    sendStatusJSON ok200 (object ["resp" .= funjsons])
