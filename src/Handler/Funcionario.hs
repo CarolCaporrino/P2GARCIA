@@ -81,4 +81,24 @@ createFuncionario agora funjson =
         2 -> "Secretaria"   :: Text
         _ -> "Secretaria"   :: Text
         
-
+data FunResJSON = FunResJSON {
+    funresId            :: UsuarioId,
+    funresUsername      :: Text,
+    funresNome          :: Text,
+    funresCpf           :: Text,
+    funresRg            :: Text,
+    funresNasc          :: Day,
+    funresCargo         :: Int,
+    funresTelefone      :: Maybe Text,
+    funresCelular       :: Maybe Text,
+    funresEmail         :: Text,
+    funresCep           :: Text,
+    funresEstado        :: Text,
+    funresCidade        :: Text,
+    funresBairro        :: Text,
+    funresLogradouro    :: Text,
+    funresNumero        :: Text,
+    funresComplemento   :: Maybe Text,
+    funresInsertedTimestamp     :: ZonedTime,
+    funresLastUpdatedTimestamp  :: ZonedTime
+} deriving (Show, Read, Generic)
