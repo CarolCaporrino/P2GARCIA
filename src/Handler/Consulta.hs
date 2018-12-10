@@ -82,3 +82,27 @@ instance ToJSON ConsResJSON where
    toJSON = genericToJSON $ aesonPrefix snakeCase
 instance FromJSON ConsResJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase  
+   
+   
+--Função que receberá o GET e responderá com o JSON da consulta
+getSingleConsultaR :: ConsultaId -> Handler TypedContent
+getSingleConsultaR consid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    consulta <- runDB $ get404 consid
+    consjson <- return $ createConsGet consid consulta
+    sendStatusJSON ok200 (object ["resp" .= consjson])
+
+--Função que recebe um id e o tipo Consulta (do banco) para criar o JSON de resposta
+createConsGet :: ConsultaId -> Consulta -> ConsResJSON
+createConsGet consultaid consulta = 
+    ConsResJSON {
+        consresId           = consultaid,
+        consresPacienteid   = consultaPacienteid consulta,
+        consresMedicoid     = consultaMedicoid consulta,
+        consresEspecid      = consultaEspecid consulta,
+        consresInicio       = utcToZonedTime utc $ consultaInicio consulta,
+        consresTermino      = utcToZonedTime utc $ consultaTermino consulta,
+        consresObservacoes  = consultaObservacoes consulta,
+        consresInsertedTimestamp    = utcToZonedTime utc $ consultaInsertedTimestamp consulta,
+        consresLastUpdatedTimestamp = utcToZonedTime utc $ consultaLastUpdatedTimestamp consulta
+    }
