@@ -8,7 +8,6 @@
 module Handler.Consulta where
 
 import Import
-import Network.HTTP.Types.Status
 import Database.Persist.Postgresql
 import Data.Time
 import Data.Aeson

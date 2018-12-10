@@ -8,10 +8,7 @@
 module Handler.Paciente where
 
 import Import
-import Network.HTTP.Types.Status
 import Database.Persist.Postgresql
-import Text.Lucius
-import Text.Julius
 import Data.Time
 import Data.Aeson
 import Data.Aeson.Casing
