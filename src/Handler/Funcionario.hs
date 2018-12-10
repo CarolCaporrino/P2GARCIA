@@ -192,3 +192,29 @@ deleteApagarFuncionarioR usuid = do
         runDB $ delete usuid
         sendStatusJSON ok200 (object ["resp" .= ("Funcionário deletado"::Text)])
 
+--PUT FUNCIONARIO
+
+--Tipo para receber o JSON de alteração de funcionario, que é diferente do de criação (sem username e senha)
+data FunAltJSON = FunAltJSON {
+    funaltNome          :: Text,
+    funaltCpf           :: Text,
+    funaltRg            :: Text,
+    funaltNasc          :: Day,
+    funaltCargo         :: Int,
+    funaltTelefone      :: Maybe Text,
+    funaltCelular       :: Maybe Text,
+    funaltEmail         :: Text,
+    funaltCep           :: Text,
+    funaltEstado        :: Text,
+    funaltCidade        :: Text,
+    funaltBairro        :: Text,
+    funaltLogradouro    :: Text,
+    funaltNumero        :: Text,
+    funaltComplemento   :: Maybe Text
+} deriving (Show, Read, Generic)
+
+instance ToJSON FunAltJSON where
+   toJSON = genericToJSON $ aesonPrefix snakeCase
+instance FromJSON FunAltJSON where
+   parseJSON = genericParseJSON $ aesonPrefix snakeCase
+   
