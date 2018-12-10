@@ -218,3 +218,33 @@ instance ToJSON FunAltJSON where
 instance FromJSON FunAltJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
    
+--Cria um Usuario com as informações novas, porém mantendo a data de criação, o username e a senha antigos.
+alterFuncionario :: FunAltJSON -> Usuario -> UTCTime -> Usuario
+alterFuncionario funjson usuario agora = 
+    Usuario {
+        usuarioUsername             = usuarioUsername usuario,
+        usuarioPassword             = usuarioPassword usuario,
+        usuarioNome                 = funaltNome funjson,
+        usuarioCpf                  = funaltCpf funjson,
+        usuarioRg                   = funaltRg funjson,
+        usuarioTipo                 = cleanTipo,
+        usuarioNasc                 = funaltNasc funjson,
+        usuarioTelefone             = funaltTelefone funjson,
+        usuarioCelular              = funaltCelular funjson,
+        usuarioEmail                = funaltEmail funjson,
+        usuarioPais                 = "BR",
+        usuarioCep                  = funaltCep funjson,
+        usuarioEstado               = funaltEstado funjson,
+        usuarioCidade               = funaltCidade funjson,
+        usuarioBairro               = funaltBairro funjson,
+        usuarioLogradouro           = funaltLogradouro funjson,
+        usuarioNumero               = funaltNumero funjson,
+        usuarioComplemento          = funaltComplemento funjson,
+        usuarioInsertedTimestamp    = usuarioInsertedTimestamp usuario,
+        usuarioLastUpdatedTimestamp = agora
+    }
+    where
+    cleanTipo = case (funaltCargo funjson) of
+        1 -> "Admin"        :: Text
+        2 -> "Secretaria"   :: Text
+        _ -> "Secretaria"   :: Text
