@@ -1,3 +1,4 @@
+{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -106,3 +107,21 @@ createConsGet consultaid consulta =
         consresInsertedTimestamp    = utcToZonedTime utc $ consultaInsertedTimestamp consulta,
         consresLastUpdatedTimestamp = utcToZonedTime utc $ consultaLastUpdatedTimestamp consulta
     }
+    
+    
+--GET LIST
+
+--Função que pegará uma "Entidade Consulta" (tipo que vem do banco (id+Consulta)) e criará um JSON de resposta
+createConsGetE :: Entity Consulta -> ConsResJSON
+createConsGetE eConsulta = createConsGet consultaid consulta
+    where
+    consultaid = entityKey eConsulta
+    consulta = entityVal eConsulta
+
+--Função que receberá o GET para a listagem de todos os pacientes
+getListConsultaR :: Handler TypedContent
+getListConsultaR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    eConsultas <- runDB $ selectList [] [Asc ConsultaId]
+    consjsons <- return $ map createConsGetE eConsultas
+    sendStatusJSON ok200 (object ["resp" .= consjsons])

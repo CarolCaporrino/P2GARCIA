@@ -16,3 +16,4 @@
 
 /consulta                       ConsultaR           POST
 /consulta/#ConsultaId/id        SingleConsultaR     GET
+/consulta/list                  ListConsultaR       GET
