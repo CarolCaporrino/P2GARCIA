@@ -178,3 +178,17 @@ getListFuncionarioR = do
     eFuncionarios <- runDB $ selectList [UsuarioTipo !=. "Medico"] [Asc UsuarioId]
     funjsons <- return $ map createFunGetE eFuncionarios
     sendStatusJSON ok200 (object ["resp" .= funjsons])
+    
+--DELETE FUNCIONARIO
+
+--Função que receberá o DELETE com um Id e apaga o paciente do banco de dados
+deleteApagarFuncionarioR :: UsuarioId -> Handler TypedContent
+deleteApagarFuncionarioR usuid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    usuario <- runDB $ get404 usuid
+    if (usuarioTipo usuario == "Medico") then
+        sendStatusJSON badRequest400 (object ["resp" .= ("Não é funcionário"::Text)])
+    else do
+        runDB $ delete usuid
+        sendStatusJSON ok200 (object ["resp" .= ("Funcionário deletado"::Text)])
+
