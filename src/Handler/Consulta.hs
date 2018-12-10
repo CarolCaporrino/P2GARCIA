@@ -125,3 +125,14 @@ getListConsultaR = do
     eConsultas <- runDB $ selectList [] [Asc ConsultaId]
     consjsons <- return $ map createConsGetE eConsultas
     sendStatusJSON ok200 (object ["resp" .= consjsons])
+    
+
+--GET LIST POR MEDICO
+
+--Função que recebe um id de médico e retorna todas suas consultas
+getMedConsultaR :: MedicoId -> Handler TypedContent
+getMedConsultaR medid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    eConsultas <- runDB $ selectList [ConsultaMedicoid ==. medid] [Asc ConsultaId]
+    consjsons <- return $ map createConsGetE eConsultas
+    sendStatusJSON ok200 (object ["resp" .= consjsons])
