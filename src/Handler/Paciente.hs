@@ -168,3 +168,27 @@ deleteApagarPacienteR pacid = do
     _ <- runDB $ get404 pacid
     runDB $ delete pacid
     sendStatusJSON ok200 (object ["resp" .= ("Paciente deletado"::Text)])
+
+
+--Cria um Paciente com as informações novas, porém mantendo a data de criação antiga.
+alterPaciente :: PacReqJSON -> Paciente -> UTCTime -> Paciente
+alterPaciente pacjson paciente agora = 
+    Paciente {
+        pacienteNome                    = pacreqNome pacjson,
+        pacienteCpf                     = pacreqCpf pacjson,
+        pacienteRg                      = pacreqRg pacjson,
+        pacienteNasc                    = pacreqNasc pacjson,
+        pacienteTelefone                = pacreqTelefone pacjson,
+        pacienteCelular                 = pacreqCelular pacjson,
+        pacienteEmail                   = pacreqEmail pacjson,
+        pacientePais                    = "BR",
+        pacienteCep                     = pacreqCep pacjson,
+        pacienteEstado                  = pacreqEstado pacjson,
+        pacienteCidade                  = pacreqCidade pacjson,
+        pacienteBairro                  = pacreqBairro pacjson,
+        pacienteLogradouro              = pacreqLogradouro pacjson,
+        pacienteNumero                  = pacreqNumero pacjson,
+        pacienteComplemento             = pacreqComplemento pacjson,
+        pacienteInsertedTimestamp       = pacienteInsertedTimestamp paciente,
+        pacienteLastUpdatedTimestamp    = agora
+    }
