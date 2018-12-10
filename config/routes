@@ -13,3 +13,5 @@
 /paciente/list                  ListPacienteR       GET
 /paciente/#PacienteId/apagar    ApagarPacienteR     DELETE
 /paciente/#PacienteId/alterar   AlterarPacienteR    PUT
+
+/consulta                       ConsultaR           POST
