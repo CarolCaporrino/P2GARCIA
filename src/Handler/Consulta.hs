@@ -61,3 +61,24 @@ createConsulta agora consjson =
         consultaInsertedTimestamp       = agora,
         consultaLastUpdatedTimestamp    = agora
     }
+    
+
+--GET 1
+    
+--Criando o tipo JSON que mandará a consulta selecionada para o front    
+data ConsResJSON = ConsResJSON {
+    consresId           :: ConsultaId,
+    consresPacienteid   :: PacienteId,
+    consresMedicoid     :: MedicoId,
+    consresEspecid      :: EspecializacaoId,
+    consresInicio       :: ZonedTime,
+    consresTermino      :: ZonedTime,
+    consresObservacoes  :: Text,
+    consresInsertedTimestamp    :: ZonedTime,
+    consresLastUpdatedTimestamp :: ZonedTime
+} deriving (Show, Read, Generic)
+   
+instance ToJSON ConsResJSON where
+   toJSON = genericToJSON $ aesonPrefix snakeCase
+instance FromJSON ConsResJSON where
+   parseJSON = genericParseJSON $ aesonPrefix snakeCase  
