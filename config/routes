@@ -3,16 +3,9 @@
 /robots.txt                     RobotsR             GET
 
 
-/favicon.ico FaviconR GET
-/robots.txt RobotsR GET
-
-
-/funcionario        FuncionarioR        POST
-
 
 /funcionario/#UsuarioId/id      SingleFuncionarioR  GET
 
-/paciente PacienteR POST 
 
 /funcionario                    FuncionarioR        POST
 

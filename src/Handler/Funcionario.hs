@@ -102,3 +102,47 @@ data FunResJSON = FunResJSON {
     funresInsertedTimestamp     :: ZonedTime,
     funresLastUpdatedTimestamp  :: ZonedTime
 } deriving (Show, Read, Generic)
+
+instance ToJSON FunResJSON where
+   toJSON = genericToJSON $ aesonPrefix snakeCase
+instance FromJSON FunResJSON where
+   parseJSON = genericParseJSON $ aesonPrefix snakeCase
+  
+   
+getSingleFuncionarioR :: UsuarioId -> Handler TypedContent
+getSingleFuncionarioR funid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    funcionario <- runDB $ get404 funid
+    funjson <- return $ createFunGet funid funcionario
+    sendStatusJSON ok200 (object ["resp" .= funjson])
+    
+createFunGet :: UsuarioId -> Usuario -> FunResJSON
+createFunGet funcid usu =
+    FunResJSON {
+        funresId            = funcid,
+        funresUsername      = usuarioUsername usu,
+        funresNome          = usuarioNome usu,
+        funresCpf           = usuarioCpf usu,
+        funresRg            = usuarioRg usu,
+        funresNasc          = usuarioNasc usu,
+        funresCargo         = tipo,
+        funresTelefone      = usuarioTelefone usu,
+        funresCelular       = usuarioCelular usu,
+        funresEmail         = usuarioEmail usu,
+        funresCep           = usuarioCep usu,
+        funresEstado        = usuarioEstado usu,
+        funresCidade        = usuarioCidade usu,
+        funresBairro        = usuarioBairro usu,
+        funresLogradouro    = usuarioLogradouro usu,
+        funresNumero        = usuarioNumero usu,
+        funresComplemento   = usuarioComplemento usu,
+        funresInsertedTimestamp     = istamp,
+        funresLastUpdatedTimestamp  = ustamp
+    }
+    where
+    istamp = utcToZonedTime utc $ usuarioInsertedTimestamp usu
+    ustamp = utcToZonedTime utc $ usuarioLastUpdatedTimestamp usu
+    tipo = case (usuarioTipo usu) of
+        "Admin" -> 1
+        "Secretaria" -> 2
+        _ -> 2
