@@ -2,8 +2,11 @@
 /favicon.ico                    FaviconR            GET
 /robots.txt                     RobotsR             GET
 
-/funcionario/#UsuarioId/id      SingleFuncionarioR  GET
 /funcionario                    FuncionarioR        POST
+/funcionario/#UsuarioId/id      SingleFuncionarioR  GET
+/funcionario/list               ListFuncionarioR    GET
+/funcionario/#UsuarioId/apagar  ApagarFuncionarioR  DELETE
+/funcionario/#UsuarioId/alterar AlterarFuncionarioR PUT
 
 /paciente                       PacienteR           POST 
 /paciente/#PacienteId/id        SinglePacienteR     GET 
