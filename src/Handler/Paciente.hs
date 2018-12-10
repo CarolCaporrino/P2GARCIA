@@ -157,3 +157,14 @@ getListPacienteR = do
     ePacientes <- runDB $ selectList [] [Asc PacienteId]
     pacjsons <- return $ map createPacGetE ePacientes
     sendStatusJSON ok200 (object ["resp" .= pacjsons])
+    
+--DELETE
+
+--Função que receberá o DELETE com um Id e apaga o paciente do banco de dados
+--(ainda incompleto, pois dependeria do apagar consulta e prontuário também)
+deleteApagarPacienteR :: PacienteId -> Handler TypedContent
+deleteApagarPacienteR pacid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    _ <- runDB $ get404 pacid
+    runDB $ delete pacid
+    sendStatusJSON ok200 (object ["resp" .= ("Paciente deletado"::Text)])
