@@ -100,3 +100,38 @@ createProntGet prontuarioid prontuario =
         prontresConteudo    = entradaProntuarioConteudo prontuario,
         prontresTimestamp   = utcToZonedTime utc $ entradaProntuarioTimestamp prontuario
     }
+    
+    
+--GET LIST
+
+getListProntuarioR :: Handler TypedContent
+getListProntuarioR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    eProntuarios <- runDB $ selectList [] [Asc EntradaProntuarioId]
+    prontjsons <- return $ map createProntGetE eProntuarios
+    sendStatusJSON created201 (object ["resp" .= prontjsons])
+    
+createProntGetE :: Entity EntradaProntuario -> ProntResJSON
+createProntGetE eProntuario = createProntGet prontuarioid prontuario
+    where
+    prontuarioid = entityKey eProntuario
+    prontuario = entityVal eProntuario
+    
+--GET PAC
+
+getPacProntuarioR :: PacienteId -> Handler TypedContent
+getPacProntuarioR pacienteid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    eProntuarios <- runDB $ selectList [EntradaProntuarioPacienteid ==. pacienteid] [Asc EntradaProntuarioId]
+    prontjsons <- return $ map createProntGetE eProntuarios
+    sendStatusJSON created201 (object ["resp" .= prontjsons])
+  
+    
+--DELETE
+
+deleteApagarProntuarioR :: EntradaProntuarioId -> Handler TypedContent
+deleteApagarProntuarioR prontuarioid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    _ <- runDB $ get404 prontuarioid
+    runDB $ delete prontuarioid
+    sendStatusJSON ok200 (object ["resp" .= ("Prontuário deletado"::Text)])
