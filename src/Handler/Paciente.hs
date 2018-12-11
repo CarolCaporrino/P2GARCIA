@@ -15,6 +15,7 @@ import Data.Aeson.Casing
 import Handler.Prontuario
 import Handler.Consulta
 import Data.Text as T (pack,unpack,Text)
+import Handler.Login
 
 --POST
 
@@ -56,10 +57,12 @@ postPacienteR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     pacjson <- requireJsonBody :: Handler PacReqJSON
-    agora <- liftIO $ getCurrentTime
-    paciente <- return $ createPaciente agora pacjson
-    pacienteid <- runDB $ insert paciente
-    sendStatusJSON created201 (object ["id" .= pacienteid])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1,2,3] $ do
+        agora <- liftIO $ getCurrentTime
+        paciente <- return $ createPaciente agora pacjson
+        pacienteid <- runDB $ insert paciente
+        sendStatusJSON created201 (object ["id" .= pacienteid])
     
 
 --Função que pega o tempo de agora e o JSON postado para criar o tipo paciente (usado no banco)    
@@ -125,9 +128,11 @@ getSinglePacienteR :: PacienteId -> Handler TypedContent
 getSinglePacienteR pacid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
-    paciente <- runDB $ get404 pacid
-    pacjson <- return $ createPacGet pacid paciente
-    sendStatusJSON ok200 (object ["resp" .= pacjson])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1,2,3] $ do
+        paciente <- runDB $ get404 pacid
+        pacjson <- return $ createPacGet pacid paciente
+        sendStatusJSON ok200 (object ["resp" .= pacjson])
 
 --Função que recebe um id e o tipo Paciente (do banco) para criar o JSON de resposta
 createPacGet :: PacienteId -> Paciente -> PacResJSON
@@ -180,12 +185,14 @@ getListPacienteR = do
     mNome <- lookupGetParam $ T.pack "nome"
     mRg <- lookupGetParam $ T.pack "rg"
     mCpf <- lookupGetParam $ T.pack "cpf"
-    nomeFilter <- return $ createPacFilterNome mNome
-    rgFilter <- return $ createPacFilterRg mRg
-    cpfFilter <- return $ createPacFilterCpf mCpf
-    ePacientes <- runDB $ selectList (concat [nomeFilter, rgFilter, cpfFilter]) [Asc PacienteId]
-    pacjsons <- return $ map createPacGetE ePacientes
-    sendStatusJSON ok200 (object ["resp" .= pacjsons])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1,2,3] $ do
+        nomeFilter <- return $ createPacFilterNome mNome
+        rgFilter <- return $ createPacFilterRg mRg
+        cpfFilter <- return $ createPacFilterCpf mCpf
+        ePacientes <- runDB $ selectList (concat [nomeFilter, rgFilter, cpfFilter]) [Asc PacienteId]
+        pacjsons <- return $ map createPacGetE ePacientes
+        sendStatusJSON ok200 (object ["resp" .= pacjsons])
     
     
 createPacFilterNome :: Maybe Text -> [Filter Paciente]
@@ -223,13 +230,15 @@ deleteApagarPacienteR pacid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     addHeader "ACCESS-CONTROL-ALLOW-METHODS" "DELETE"
-    _ <- runDB $ get404 pacid
-    eCons <- runDB $ selectList [ConsultaPacienteid ==. pacid] [Asc ConsultaId]
-    ePronts <- runDB $ selectList [EntradaProntuarioPacienteid ==. pacid] [Asc EntradaProntuarioId]
-    _ <- mapM apagaCons eCons
-    _ <- mapM apagaPront ePronts
-    runDB $ delete pacid
-    sendStatusJSON ok200 (object ["resp" .= ("Paciente deletado"::Text)]) 
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1] $ do
+        _ <- runDB $ get404 pacid
+        eCons <- runDB $ selectList [ConsultaPacienteid ==. pacid] [Asc ConsultaId]
+        ePronts <- runDB $ selectList [EntradaProntuarioPacienteid ==. pacid] [Asc EntradaProntuarioId]
+        _ <- mapM apagaCons eCons
+        _ <- mapM apagaPront ePronts
+        runDB $ delete pacid
+        sendStatusJSON ok200 (object ["resp" .= ("Paciente deletado"::Text)]) 
     where
     apagaCons eCon = deleteApagarConsultaR (entityKey eCon)
     apagaPront ePront = deleteApagarProntuarioR (entityKey ePront)
@@ -275,8 +284,10 @@ putAlterarPacienteR pacid = do
     addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PUT"
     paciente <- runDB $ get404 pacid
     pacjson <- requireJsonBody :: Handler PacReqJSON
-    agora <- liftIO $ getCurrentTime
-    altPaciente <- return $ alterPaciente pacjson paciente agora
-    runDB $ replace pacid altPaciente
-    sendStatusJSON ok200 (object ["resp" .= ("Paciente alterado"::Text)])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1,2] $ do
+        agora <- liftIO $ getCurrentTime
+        altPaciente <- return $ alterPaciente pacjson paciente agora
+        runDB $ replace pacid altPaciente
+        sendStatusJSON ok200 (object ["resp" .= ("Paciente alterado"::Text)])
     
