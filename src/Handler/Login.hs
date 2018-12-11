@@ -13,15 +13,26 @@ import Data.Time
 import Data.Aeson
 import Data.Aeson.Casing
 import Crypto.BCrypt
-import Data.ByteString.Lazy.Char8 as BSLC
-import Data.ByteString.Lazy as BSL
-import Data.ByteString.Char8 as BSC
-import Data.ByteString as BS
-import Data.Text as T (pack,unpack,Text)
+import Data.ByteString.Lazy.Char8   as BSLC (pack,unpack)
+import Data.ByteString.Lazy         as BSL  (fromStrict,toStrict)
+import Data.ByteString.Char8        as BSC  (pack,unpack)
+import Data.ByteString              as BS   (pack,unpack,ByteString)
+import Data.Text                    as T    (pack,unpack,Text)
 import Data.Time.Clock.POSIX
 import Jose.Jws
 import Jose.Jwa
 import Jose.Jwt
+
+
+execJwt :: (Maybe T.Text) -> [Int] -> Handler TypedContent -> Handler TypedContent
+execJwt mjwt perm func = do
+    mjwtInfo <- jwtAll mjwt
+    case mjwtInfo of
+        Just jwtInfo -> do
+            case (jwjCargo jwtInfo) of
+                x | elem x perm -> func
+                _ -> sendStatusJSON forbidden403 (object ["resp" .= ("Não autorizado"::Text)])
+        Nothing -> sendStatusJSON unauthorized401 (object ["resp" .= ("Não autenticado"::Text)])
 
 
 jwtAll :: (Maybe T.Text) -> Handler (Maybe JwtJSON)
