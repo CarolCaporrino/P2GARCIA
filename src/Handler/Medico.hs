@@ -164,3 +164,18 @@ createMedGet medicoid usuario medico eEspecs =
     where
     istamp = utcToZonedTime utc $ usuarioInsertedTimestamp usuario
     ustamp = utcToZonedTime utc $ usuarioLastUpdatedTimestamp usuario
+    
+    
+createFromMed :: Entity Medico -> Handler MedResJSON
+createFromMed eMedico = do
+    medico <- return $ entityVal eMedico
+    medicoid <- return $ entityKey eMedico
+    usuarioid <- return $ medicoUserid medico
+    usuario <- runDB $ get404 usuarioid
+    eEspecmedics <- runDB $ selectList [EspecMedicoMedicoid ==. medicoid] [Asc EspecMedicoId]
+    emids <- return $ map (especMedicoEspecid . entityVal) eEspecmedics
+    especs <- mapM espec emids
+    medgetjson <- return $ createMedGet medicoid usuario medico especs
+    return $ medgetjson
+    where
+    espec emid = Entity (emid) <$> (runDB $ get404 emid) :: Handler (Entity Especializacao)
