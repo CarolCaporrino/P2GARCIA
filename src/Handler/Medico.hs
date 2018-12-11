@@ -44,6 +44,23 @@ instance FromJSON MedReqJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
    
 
+--Função que receberá o POST de medico
+postMedicoR :: Handler TypedContent
+postMedicoR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    medjson <- requireJsonBody :: Handler MedReqJSON
+    agora <- liftIO $ getCurrentTime
+    usuario <- return $ createUsuario agora medjson
+    usuid <- runDB $ insert usuario
+    medico <- return $ createMedico usuid $ medreqCrm medjson
+    medid <- runDB $ insert medico
+    especmeds <- return $ createEspecMeds agora medid $ medreqEspecializacoes medjson
+    _ <- mapM insEspecMed especmeds
+    sendStatusJSON created201 (object ["usuarioid" .= usuid, "medicoid" .= medid])
+    where
+    insEspecMed e = runDB $ insert e :: Handler EspecMedicoId
+
+
 --Função que pega o tempo de agora e o JSON postado para criar o tipo usuario (usado no banco)    
 createUsuario :: UTCTime -> MedReqJSON -> Usuario
 createUsuario agora medjson = do
