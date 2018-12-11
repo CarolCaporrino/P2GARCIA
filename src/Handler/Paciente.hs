@@ -12,6 +12,8 @@ import Database.Persist.Postgresql
 import Data.Time
 import Data.Aeson
 import Data.Aeson.Casing
+import Handler.Prontuario
+import Handler.Consulta
 
 --POST
 
@@ -163,8 +165,15 @@ deleteApagarPacienteR :: PacienteId -> Handler TypedContent
 deleteApagarPacienteR pacid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     _ <- runDB $ get404 pacid
+    eCons <- runDB $ selectList [ConsultaPacienteid ==. pacid] [Asc ConsultaId]
+    ePronts <- runDB $ selectList [EntradaProntuarioPacienteid ==. pacid] [Asc EntradaProntuarioId]
+    _ <- mapM apagaCons eCons
+    _ <- mapM apagaPront ePronts
     runDB $ delete pacid
-    sendStatusJSON ok200 (object ["resp" .= ("Paciente deletado"::Text)])
+    sendStatusJSON ok200 (object ["resp" .= ("Paciente deletado"::Text)]) 
+    where
+    apagaCons eCon = deleteApagarConsultaR (entityKey eCon)
+    apagaPront ePront = deleteApagarProntuarioR (entityKey ePront)
 
 
 --Cria um Paciente com as informações novas, porém mantendo a data de criação antiga.
