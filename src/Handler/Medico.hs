@@ -234,3 +234,38 @@ instance ToJSON MedAltJSON where
    toJSON = genericToJSON $ aesonPrefix snakeCase
 instance FromJSON MedAltJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
+   
+
+createAltUsu :: UTCTime -> MedAltJSON -> Usuario -> Usuario
+createAltUsu agora medjson usu =
+    Usuario {
+        usuarioUsername     = usuarioUsername usu,
+        usuarioPassword     = usuarioPassword usu,
+        usuarioNome         = medaltNome medjson,
+        usuarioCpf          = medaltCpf medjson,
+        usuarioRg           = medaltRg medjson,
+        usuarioNasc         = medaltNasc medjson,
+        usuarioTipo         = "Medico",
+        usuarioTelefone     = medaltTelefone medjson,
+        usuarioCelular      = medaltCelular medjson,
+        usuarioEmail        = medaltEmail medjson,
+        usuarioPais         = "BR",
+        usuarioCep          = medaltCep medjson,
+        usuarioEstado       = medaltEstado medjson,
+        usuarioCidade       = medaltCidade medjson,
+        usuarioBairro       = medaltBairro medjson,
+        usuarioLogradouro   = medaltLogradouro medjson,
+        usuarioNumero       = medaltNumero medjson,
+        usuarioComplemento  = medaltComplemento medjson,
+        usuarioInsertedTimestamp        = usuarioInsertedTimestamp usu,
+        usuarioLastUpdatedTimestamp     = agora
+    }
+    
+    
+createAltMed :: UsuarioId -> MedAltJSON -> Medico -> Medico
+createAltMed usuarioid medjson med =
+    Medico {
+        medicoUserid    = usuarioid,
+        medicoCrm       = medaltCrm medjson,
+        medicoAtivo     = medicoAtivo med
+    }
