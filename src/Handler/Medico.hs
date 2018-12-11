@@ -194,6 +194,16 @@ createFromMed eMedico = do
     return $ medgetjson
     where
     espec emid = Entity (emid) <$> (runDB $ get404 emid) :: Handler (Entity Especializacao)
+
+
+--GET LIST
+
+getListMedicoR :: Handler TypedContent
+getListMedicoR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    eMedicos <- runDB $ selectList [] [Asc MedicoId]
+    medgetjsons <- mapM createFromMed eMedicos
+    sendStatusJSON ok200 (object ["resp" .= medgetjsons])
     
     
 -- ativar / desativar

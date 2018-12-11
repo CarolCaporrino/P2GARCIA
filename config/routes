@@ -20,3 +20,10 @@
 /consulta/#MedicoId/medico      MedConsultaR        GET
 /consulta/#ConsultaId/apagar    ApagarConsultaR     DELETE
 /consulta/#ConsultaId/alterar   AlterarConsultaR    PUT
+
+/medico                         MedicoR             POST
+/medico/#MedicoId/id            SingleMedicoR       GET
+/medico/list                    ListMedicoR         GET
+/medico/#MedicoId/ativar        AtivarMedicoR       PATCH
+/medico/#MedicoId/desativar     DesativarMedicoR    PATCH
+/medico/#MedicoId/alterar       AlterarMedicoR      PUT
