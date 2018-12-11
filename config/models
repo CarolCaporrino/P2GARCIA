@@ -4,18 +4,18 @@ Usuario json
     nome            Text
     cpf             Text
     rg              Text
-    nasc            Day
+    nasc            Day Maybe
     tipo            Text
     telefone        Text Maybe
     celular         Text Maybe
     email           Text
     pais            Text
-    cep             Text
-    estado          Text
-    cidade          Text
-    bairro          Text
-    logradouro      Text
-    numero          Text
+    cep             Text Maybe
+    estado          Text Maybe
+    cidade          Text Maybe
+    bairro          Text Maybe
+    logradouro      Text Maybe
+    numero          Text Maybe
     complemento     Text Maybe
     insertedTimestamp       UTCTime
     lastUpdatedTimestamp    UTCTime
@@ -48,17 +48,17 @@ Paciente json
     nome            Text
     cpf             Text
     rg              Text
-    nasc            Day
+    nasc            Day  Maybe
     telefone        Text Maybe
     celular         Text Maybe
     email           Text
     pais            Text
-    cep             Text
-    estado          Text
-    cidade          Text
-    bairro          Text
-    logradouro      Text
-    numero          Text
+    cep             Text Maybe
+    estado          Text Maybe
+    cidade          Text Maybe
+    bairro          Text Maybe
+    logradouro      Text Maybe
+    numero          Text Maybe
     complemento     Text Maybe
     insertedTimestamp       UTCTime
     lastUpdatedTimestamp    UTCTime
