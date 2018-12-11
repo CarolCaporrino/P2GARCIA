@@ -14,6 +14,7 @@ import Data.Aeson
 import Data.Aeson.Casing
 import Handler.Login
 import Data.Text as T (pack,unpack,Text)
+import Handler.Login
 
 --POST FUNCIONARIO
 
@@ -30,13 +31,15 @@ postFuncionarioR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     funjson <- requireJsonBody :: Handler FunReqJSON
-    agora <- liftIO $ getCurrentTime
-    mFuncionario <- return $ createFuncionario agora funjson
-    case mFuncionario of
-        Nothing -> sendStatusJSON badRequest400 (object ["resp" .= ("Inválido"::Text)])
-        Just funcionario -> do
-            funcionarioid <- runDB $ insert funcionario
-            sendStatusJSON created201 (object ["id" .= funcionarioid])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1] $ do
+        agora <- liftIO $ getCurrentTime
+        mFuncionario <- return $ createFuncionario agora funjson
+        case mFuncionario of
+            Nothing -> sendStatusJSON badRequest400 (object ["resp" .= ("Inválido"::Text)])
+            Just funcionario -> do
+                funcionarioid <- runDB $ insert funcionario
+                sendStatusJSON created201 (object ["id" .= funcionarioid])
     
 --Criando o tipo JSON para receber um novo funcionario
 data FunReqJSON = FunReqJSON {
@@ -142,12 +145,14 @@ getSingleFuncionarioR :: UsuarioId -> Handler TypedContent
 getSingleFuncionarioR usuid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
-    usuario <- runDB $ get404 usuid
-    if (usuarioTipo usuario == "Medico") then
-        sendStatusJSON badRequest400 (object ["resp" .= ("Não é funcionário"::Text)])
-    else do
-        funjson <- return $ createFunGet usuid usuario
-        sendStatusJSON ok200 (object ["resp" .= funjson])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1,2,3] $ do
+        usuario <- runDB $ get404 usuid
+        if (usuarioTipo usuario == "Medico") then
+            sendStatusJSON badRequest400 (object ["resp" .= ("Não é funcionário"::Text)])
+        else do
+            funjson <- return $ createFunGet usuid usuario
+            sendStatusJSON ok200 (object ["resp" .= funjson])
     
 --Função que recebe um id e o tipo Usuario (do banco) para criar o JSON de resposta 
 createFunGet :: UsuarioId -> Usuario -> FunResJSON
@@ -205,11 +210,13 @@ getListFuncionarioR = do
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     mNome <- lookupGetParam $ T.pack "nome"
     mCargo <- lookupGetParam $ T.pack "cargo"
-    nomeFilter <- return $ createFuncFilterNome mNome
-    rgFilter <- return $ createFuncFilterCargo mCargo
-    eFuncionarios <- runDB $ selectList (concat [[UsuarioTipo !=. "Medico"],nomeFilter,rgFilter]) [Asc UsuarioId]
-    funjsons <- return $ map createFunGetE eFuncionarios
-    sendStatusJSON ok200 (object ["resp" .= funjsons])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1,2,3] $ do
+        nomeFilter <- return $ createFuncFilterNome mNome
+        rgFilter <- return $ createFuncFilterCargo mCargo
+        eFuncionarios <- runDB $ selectList (concat [[UsuarioTipo !=. "Medico"],nomeFilter,rgFilter]) [Asc UsuarioId]
+        funjsons <- return $ map createFunGetE eFuncionarios
+        sendStatusJSON ok200 (object ["resp" .= funjsons])
 
 
 createFuncFilterNome :: Maybe Text -> [Filter Usuario]
@@ -241,12 +248,14 @@ deleteApagarFuncionarioR usuid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     addHeader "ACCESS-CONTROL-ALLOW-METHODS" "DELETE"
-    usuario <- runDB $ get404 usuid
-    if (usuarioTipo usuario == "Medico") then
-        sendStatusJSON badRequest400 (object ["resp" .= ("Não é funcionário"::Text)])
-    else do
-        runDB $ delete usuid
-        sendStatusJSON ok200 (object ["resp" .= ("Funcionário deletado"::Text)])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1] $ do
+        usuario <- runDB $ get404 usuid
+        if (usuarioTipo usuario == "Medico") then
+            sendStatusJSON badRequest400 (object ["resp" .= ("Não é funcionário"::Text)])
+        else do
+            runDB $ delete usuid
+            sendStatusJSON ok200 (object ["resp" .= ("Funcionário deletado"::Text)])
 
 --PUT FUNCIONARIO
 
@@ -289,14 +298,16 @@ putAlterarFuncionarioR usuid = do
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PUT"
     funjson <- requireJsonBody :: Handler FunAltJSON
-    usuario <- runDB $ get404 usuid
-    if (usuarioTipo usuario == "Medico") then
-        sendStatusJSON badRequest400 (object ["resp" .= ("Não é funcionário"::Text)])
-    else do
-        agora <- liftIO $ getCurrentTime
-        altFuncionario <- return $ alterFuncionario funjson usuario agora 
-        runDB $ replace usuid altFuncionario
-        sendStatusJSON ok200 (object ["resp" .= ("Funcionario alterado"::Text)])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1] $ do
+        usuario <- runDB $ get404 usuid
+        if (usuarioTipo usuario == "Medico") then
+            sendStatusJSON badRequest400 (object ["resp" .= ("Não é funcionário"::Text)])
+        else do
+            agora <- liftIO $ getCurrentTime
+            altFuncionario <- return $ alterFuncionario funjson usuario agora 
+            runDB $ replace usuid altFuncionario
+            sendStatusJSON ok200 (object ["resp" .= ("Funcionario alterado"::Text)])
    
 --Cria um Usuario com as informações novas, porém mantendo a data de criação, o username e a senha antigos.
 alterFuncionario :: FunAltJSON -> Usuario -> UTCTime -> Usuario
