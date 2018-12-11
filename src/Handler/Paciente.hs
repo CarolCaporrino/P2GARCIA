@@ -14,6 +14,7 @@ import Data.Aeson
 import Data.Aeson.Casing
 import Handler.Prontuario
 import Handler.Consulta
+import Data.Text as T (pack,unpack,Text)
 
 --POST
 
@@ -176,9 +177,34 @@ getListPacienteR :: Handler TypedContent
 getListPacienteR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
-    ePacientes <- runDB $ selectList [] [Asc PacienteId]
+    mNome <- lookupGetParam $ T.pack "nome"
+    mRg <- lookupGetParam $ T.pack "rg"
+    mCpf <- lookupGetParam $ T.pack "cpf"
+    nomeFilter <- return $ createPacFilterNome mNome
+    rgFilter <- return $ createPacFilterRg mRg
+    cpfFilter <- return $ createPacFilterCpf mCpf
+    ePacientes <- runDB $ selectList (concat [nomeFilter, rgFilter, cpfFilter]) [Asc PacienteId]
     pacjsons <- return $ map createPacGetE ePacientes
     sendStatusJSON ok200 (object ["resp" .= pacjsons])
+    
+    
+createPacFilterNome :: Maybe Text -> [Filter Paciente]
+createPacFilterNome mNome = 
+    case mNome of
+        Just nome -> [Filter PacienteNome (Left $ concat ["%", nome, "%"]) (BackendSpecificFilter "ILIKE")]
+        Nothing -> []
+        
+createPacFilterRg :: Maybe Text -> [Filter Paciente]
+createPacFilterRg mRg = 
+    case mRg of
+        Just rg -> [Filter PacienteRg (Left $ concat ["%", rg, "%"]) (BackendSpecificFilter "ILIKE")]
+        Nothing -> []
+
+createPacFilterCpf :: Maybe Text -> [Filter Paciente]
+createPacFilterCpf mCpf = 
+    case mCpf of
+        Just cpf -> [Filter PacienteCpf (Left $ concat ["%", cpf, "%"]) (BackendSpecificFilter "ILIKE")]
+        Nothing -> []
     
 --DELETE
 

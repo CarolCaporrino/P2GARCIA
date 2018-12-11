@@ -39,5 +39,6 @@
 /espec/#EspecializacaoId/id     SingleEspecializacaoR   GET OPTIONS
 
 /resetarsenha/#Text/usuario     RedefinirSenhaR     PATCH OPTIONS
+/alterarsenha                   AlterarSenhaR       PATCH OPTIONS
 
 /login                          LoginR              POST
