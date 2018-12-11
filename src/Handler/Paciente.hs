@@ -18,6 +18,7 @@ import Handler.Consulta
 --POST
 
 
+
 --Criando o tipo JSON para receber um novo paciente
 data PacReqJSON = PacReqJSON {
     pacreqNome          :: Text,
@@ -42,10 +43,17 @@ instance FromJSON PacReqJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
 
 
+optionsPacienteR :: Handler TypedContent
+optionsPacienteR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
+
 --Função que receberá o POST de paciente
 postPacienteR :: Handler TypedContent
 postPacienteR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     pacjson <- requireJsonBody :: Handler PacReqJSON
     agora <- liftIO $ getCurrentTime
     paciente <- return $ createPaciente agora pacjson
@@ -105,10 +113,17 @@ instance FromJSON PacResJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
   
 
+optionsSinglePacienteR :: PacienteId -> Handler TypedContent
+optionsSinglePacienteR _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
+
 --Função que receberá o GET e responderá com o JSON do paciente
 getSinglePacienteR :: PacienteId -> Handler TypedContent
 getSinglePacienteR pacid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     paciente <- runDB $ get404 pacid
     pacjson <- return $ createPacGet pacid paciente
     sendStatusJSON ok200 (object ["resp" .= pacjson])
@@ -148,22 +163,40 @@ createPacGetE ePaciente = createPacGet pacienteid paciente
     where
     pacienteid = entityKey ePaciente
     paciente = entityVal ePaciente
+    
+    
+optionsListPacienteR :: Handler TypedContent
+optionsListPacienteR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
 
 --Função que receberá o GET para a listagem de todos os pacientes
 getListPacienteR :: Handler TypedContent
 getListPacienteR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     ePacientes <- runDB $ selectList [] [Asc PacienteId]
     pacjsons <- return $ map createPacGetE ePacientes
     sendStatusJSON ok200 (object ["resp" .= pacjsons])
     
 --DELETE
 
+optionsApagarPacienteR :: PacienteId -> Handler TypedContent
+optionsApagarPacienteR _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "DELETE"
+    sendStatusJSON ok200 (object [])
+
+
 --Função que receberá o DELETE com um Id e apaga o paciente do banco de dados
 --(ainda incompleto, pois dependeria do apagar consulta e prontuário também)
 deleteApagarPacienteR :: PacienteId -> Handler TypedContent
 deleteApagarPacienteR pacid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "DELETE"
     _ <- runDB $ get404 pacid
     eCons <- runDB $ selectList [ConsultaPacienteid ==. pacid] [Asc ConsultaId]
     ePronts <- runDB $ selectList [EntradaProntuarioPacienteid ==. pacid] [Asc EntradaProntuarioId]
@@ -175,6 +208,8 @@ deleteApagarPacienteR pacid = do
     apagaCons eCon = deleteApagarConsultaR (entityKey eCon)
     apagaPront ePront = deleteApagarProntuarioR (entityKey ePront)
 
+
+--PUT
 
 --Cria um Paciente com as informações novas, porém mantendo a data de criação antiga.
 alterPaciente :: PacReqJSON -> Paciente -> UTCTime -> Paciente
@@ -198,13 +233,20 @@ alterPaciente pacjson paciente agora =
         pacienteInsertedTimestamp       = pacienteInsertedTimestamp paciente,
         pacienteLastUpdatedTimestamp    = agora
     }
-    
---PUT
+
+optionsAlterarPacienteR :: PacienteId -> Handler TypedContent
+optionsAlterarPacienteR _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PUT"
+    sendStatusJSON ok200 (object [])
 
 --Função que receberá o PUT com um Id e as novas informações do paciente, colocando no banco com o mesmo id
 putAlterarPacienteR :: PacienteId -> Handler TypedContent
 putAlterarPacienteR pacid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PUT"
     paciente <- runDB $ get404 pacid
     pacjson <- requireJsonBody :: Handler PacReqJSON
     agora <- liftIO $ getCurrentTime

@@ -16,10 +16,18 @@ import Handler.Login
 
 --POST FUNCIONARIO
 
+
+optionsFuncionarioR :: Handler TypedContent
+optionsFuncionarioR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
+
 --Função que receberá o POST de funcionario
 postFuncionarioR :: Handler TypedContent
 postFuncionarioR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     funjson <- requireJsonBody :: Handler FunReqJSON
     agora <- liftIO $ getCurrentTime
     mFuncionario <- return $ createFuncionario agora funjson
@@ -56,6 +64,7 @@ instance ToJSON FunReqJSON where
    toJSON = genericToJSON $ aesonPrefix snakeCase
 instance FromJSON FunReqJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
+    
     
 --Função que pega o tempo de agora e o JSON postado para criar o tipo usuario (usado no banco) 
 createFuncionario :: UTCTime -> FunReqJSON -> Maybe Usuario
@@ -120,11 +129,18 @@ instance ToJSON FunResJSON where
 instance FromJSON FunResJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
   
+
+optionsSingleFuncionarioR :: UsuarioId -> Handler TypedContent
+optionsSingleFuncionarioR _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
   
 --Função que receberá o GET e responderá com o JSON do funcionario   
 getSingleFuncionarioR :: UsuarioId -> Handler TypedContent
 getSingleFuncionarioR usuid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     usuario <- runDB $ get404 usuid
     if (usuarioTipo usuario == "Medico") then
         sendStatusJSON badRequest400 (object ["resp" .= ("Não é funcionário"::Text)])
@@ -173,20 +189,38 @@ createFunGetE eFuncionario = createFunGet funcionarioid funcionario
     funcionarioid = entityKey eFuncionario
     funcionario = entityVal eFuncionario
 
+
+optionsListFuncionarioR :: Handler TypedContent
+optionsListFuncionarioR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
+
+
 --Função que receberá o GET para a listagem de todos os funcionarios
 getListFuncionarioR :: Handler TypedContent
 getListFuncionarioR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     eFuncionarios <- runDB $ selectList [UsuarioTipo !=. "Medico"] [Asc UsuarioId]
     funjsons <- return $ map createFunGetE eFuncionarios
     sendStatusJSON ok200 (object ["resp" .= funjsons])
     
+    
 --DELETE FUNCIONARIO
+optionsApagarFuncionarioR :: UsuarioId -> Handler TypedContent
+optionsApagarFuncionarioR _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "DELETE"
+    sendStatusJSON ok200 (object [])
 
 --Função que receberá o DELETE com um Id e apaga o paciente do banco de dados
 deleteApagarFuncionarioR :: UsuarioId -> Handler TypedContent
 deleteApagarFuncionarioR usuid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "DELETE"
     usuario <- runDB $ get404 usuid
     if (usuarioTipo usuario == "Medico") then
         sendStatusJSON badRequest400 (object ["resp" .= ("Não é funcionário"::Text)])
@@ -220,10 +254,20 @@ instance ToJSON FunAltJSON where
 instance FromJSON FunAltJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
    
+
+optionsAlterarFuncionarioR :: UsuarioId -> Handler TypedContent
+optionsAlterarFuncionarioR _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PUT"
+    sendStatusJSON ok200 (object [])   
+   
 --Função que receberá o PUT com um Id e as novas informações do funcionario, colocando no banco com o mesmo id
 putAlterarFuncionarioR :: UsuarioId -> Handler TypedContent
 putAlterarFuncionarioR usuid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PUT"
     funjson <- requireJsonBody :: Handler FunAltJSON
     usuario <- runDB $ get404 usuid
     if (usuarioTipo usuario == "Medico") then

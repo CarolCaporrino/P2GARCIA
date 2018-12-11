@@ -2,30 +2,40 @@
 /favicon.ico                    FaviconR            GET
 /robots.txt                     RobotsR             GET
 
-/funcionario                    FuncionarioR        POST
-/funcionario/#UsuarioId/id      SingleFuncionarioR  GET
-/funcionario/list               ListFuncionarioR    GET
-/funcionario/#UsuarioId/apagar  ApagarFuncionarioR  DELETE
-/funcionario/#UsuarioId/alterar AlterarFuncionarioR PUT
+/funcionario                    FuncionarioR        POST OPTIONS
+/funcionario/#UsuarioId/id      SingleFuncionarioR  GET OPTIONS
+/funcionario/list               ListFuncionarioR    GET OPTIONS
+/funcionario/#UsuarioId/apagar  ApagarFuncionarioR  DELETE OPTIONS
+/funcionario/#UsuarioId/alterar AlterarFuncionarioR PUT OPTIONS
 
-/paciente                       PacienteR           POST 
-/paciente/#PacienteId/id        SinglePacienteR     GET 
-/paciente/list                  ListPacienteR       GET
-/paciente/#PacienteId/apagar    ApagarPacienteR     DELETE
-/paciente/#PacienteId/alterar   AlterarPacienteR    PUT
+/paciente                       PacienteR           POST OPTIONS
+/paciente/#PacienteId/id        SinglePacienteR     GET OPTIONS
+/paciente/list                  ListPacienteR       GET OPTIONS
+/paciente/#PacienteId/apagar    ApagarPacienteR     DELETE OPTIONS
+/paciente/#PacienteId/alterar   AlterarPacienteR    PUT OPTIONS
 
-/consulta                       ConsultaR           POST
-/consulta/#ConsultaId/id        SingleConsultaR     GET
-/consulta/list                  ListConsultaR       GET
-/consulta/#MedicoId/medico      MedConsultaR        GET
-/consulta/#ConsultaId/apagar    ApagarConsultaR     DELETE
-/consulta/#ConsultaId/alterar   AlterarConsultaR    PUT
+/consulta                       ConsultaR           POST OPTIONS
+/consulta/#ConsultaId/id        SingleConsultaR     GET OPTIONS
+/consulta/list                  ListConsultaR       GET OPTIONS
+/consulta/#MedicoId/medico      MedConsultaR        GET OPTIONS
+/consulta/#ConsultaId/apagar    ApagarConsultaR     DELETE OPTIONS
+/consulta/#ConsultaId/alterar   AlterarConsultaR    PUT OPTIONS
 
-/medico                         MedicoR             POST
-/medico/#MedicoId/id            SingleMedicoR       GET
-/medico/list                    ListMedicoR         GET
-/medico/#MedicoId/ativar        AtivarMedicoR       PATCH
-/medico/#MedicoId/desativar     DesativarMedicoR    PATCH
-/medico/#MedicoId/alterar       AlterarMedicoR      PUT
+/medico                         MedicoR             POST OPTIONS
+/medico/#MedicoId/id            SingleMedicoR       GET OPTIONS
+/medico/list                    ListMedicoR         GET OPTIONS
+/medico/#MedicoId/ativar        AtivarMedicoR       PATCH OPTIONS
+/medico/#MedicoId/desativar     DesativarMedicoR    PATCH OPTIONS
+/medico/#MedicoId/alterar       AlterarMedicoR      PUT OPTIONS
+
+/prontuario                             ProntuarioR         POST OPTIONS
+/prontuario/list                        ListProntuarioR     GET OPTIONS
+/prontuario/#EntradaProntuarioId/id     SingleProntuarioR   GET OPTIONS
+/prontuario/#PacienteId/paciente        PacProntuarioR      GET OPTIONS
+/prontuario/#EntradaProntuarioId/apagar ApagarProntuarioR   DELETE OPTIONS
+
+/especs         EspecR      POST
+/espec/list     ListEspecR  GET OPTIONS
+/espec/#EspecializacaoId/id     SingleEspecializacaoR   GET OPTIONS
 
 /login                          LoginR              POST

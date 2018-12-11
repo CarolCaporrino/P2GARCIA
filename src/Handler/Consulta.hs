@@ -32,12 +32,19 @@ instance ToJSON ConsReqJSON where
    toJSON = genericToJSON $ aesonPrefix snakeCase
 instance FromJSON ConsReqJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
-   
+ 
+ 
+optionsConsultaR :: Handler TypedContent
+optionsConsultaR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])  
    
 --Função que receberá o POST de consulta
 postConsultaR :: Handler TypedContent
 postConsultaR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     consjson <- requireJsonBody :: Handler ConsReqJSON
     _ <- runDB $ get404 $ consreqPacienteid consjson
     _ <- runDB $ get404 $ consreqMedicoid consjson
@@ -83,11 +90,17 @@ instance ToJSON ConsResJSON where
 instance FromJSON ConsResJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase  
    
+optionsSingleConsultaR :: ConsultaId -> Handler TypedContent
+optionsSingleConsultaR _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
    
 --Função que receberá o GET e responderá com o JSON da consulta
 getSingleConsultaR :: ConsultaId -> Handler TypedContent
 getSingleConsultaR consid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     consulta <- runDB $ get404 consid
     consjson <- return $ createConsGet consid consulta
     sendStatusJSON ok200 (object ["resp" .= consjson])
@@ -117,10 +130,18 @@ createConsGetE eConsulta = createConsGet consultaid consulta
     consultaid = entityKey eConsulta
     consulta = entityVal eConsulta
 
+
+optionsListConsultaR :: Handler TypedContent
+optionsListConsultaR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
+
 --Função que receberá o GET para a listagem de todos os pacientes
 getListConsultaR :: Handler TypedContent
 getListConsultaR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     eConsultas <- runDB $ selectList [] [Asc ConsultaId]
     consjsons <- return $ map createConsGetE eConsultas
     sendStatusJSON ok200 (object ["resp" .= consjsons])
@@ -128,10 +149,17 @@ getListConsultaR = do
 
 --GET LIST POR MEDICO
 
+optionsMedConsultaR :: MedicoId -> Handler TypedContent
+optionsMedConsultaR _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
+
 --Função que recebe um id de médico e retorna todas suas consultas
 getMedConsultaR :: MedicoId -> Handler TypedContent
 getMedConsultaR medid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     eConsultas <- runDB $ selectList [ConsultaMedicoid ==. medid] [Asc ConsultaId]
     consjsons <- return $ map createConsGetE eConsultas
     sendStatusJSON ok200 (object ["resp" .= consjsons])
@@ -139,10 +167,20 @@ getMedConsultaR medid = do
     
 --DELETE
 
+
+optionsApagarConsultaR :: ConsultaId -> Handler TypedContent
+optionsApagarConsultaR _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "DELETE"
+    sendStatusJSON ok200 (object [])   
+    
 --Função que receberá o DELETE com um Id e apaga a consulta do banco de dados
 deleteApagarConsultaR :: ConsultaId -> Handler TypedContent
 deleteApagarConsultaR consid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "DELETE"
     _ <- runDB $ get404 consid
     runDB $ delete consid
     sendStatusJSON ok200 (object ["resp" .= ("Consulta deletada"::Text)])
@@ -151,10 +189,20 @@ deleteApagarConsultaR consid = do
 
 --PUT
 
+optionsAlterarConsultaR :: ConsultaId -> Handler TypedContent
+optionsAlterarConsultaR _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PUT"
+    sendStatusJSON ok200 (object [])
+
+
 --Função que receberá o PUT com um Id e as novas informações da consulta, colocando no banco com o mesmo id
 putAlterarConsultaR :: ConsultaId -> Handler TypedContent
 putAlterarConsultaR consid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PUT"
     consulta <- runDB $ get404 consid
     consjson <- requireJsonBody :: Handler ConsReqJSON
     agora <- liftIO $ getCurrentTime

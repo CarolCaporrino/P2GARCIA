@@ -17,6 +17,7 @@ import Handler.Login
 
 --POST
 
+
 --Criando o tipo JSON para receber um novo medico
 data MedReqJSON = MedReqJSON {
     medreqUsername          :: Text,
@@ -43,12 +44,19 @@ instance ToJSON MedReqJSON where
    toJSON = genericToJSON $ aesonPrefix snakeCase
 instance FromJSON MedReqJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
-   
+ 
+ 
+optionsMedicoR :: Handler TypedContent
+optionsMedicoR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])   
 
 --Função que receberá o POST de medico
 postMedicoR :: Handler TypedContent
 postMedicoR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     medjson <- requireJsonBody :: Handler MedReqJSON
     agora <- liftIO $ getCurrentTime
     mUsuario <- return $ createUsuario agora medjson
@@ -59,7 +67,7 @@ postMedicoR = do
             medid <- runDB $ insert medico
             especmeds <- return $ createEspecMeds agora medid $ medreqEspecializacoes medjson
             _ <- mapM insEspecMed especmeds
-            sendStatusJSON created201 (object ["usuarioid" .= usuid, "medicoid" .= medid])
+            sendStatusJSON created201 (object ["resp" .= (object ["usuarioid" .= usuid,"medicoid" .= medid])])
         Nothing -> sendStatusJSON badRequest400 (object ["resp" .= ("Inválido"::Text)])
     where
     insEspecMed e = runDB $ insert e :: Handler EspecMedicoId
@@ -141,10 +149,17 @@ instance FromJSON MedResJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
    
 
+optionsSingleMedicoR :: MedicoId -> Handler TypedContent
+optionsSingleMedicoR _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
+
 --Função que receberá o GET e responderá com o JSON do medico
 getSingleMedicoR :: MedicoId -> Handler TypedContent
 getSingleMedicoR medicoid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     medico <- runDB $ get404 medicoid :: Handler Medico
     eMedico <- return $ Entity medicoid medico :: Handler (Entity Medico)
     medgetjson <- createFromMed eMedico
@@ -198,9 +213,16 @@ createFromMed eMedico = do
 
 --GET LIST
 
+optionsListMedicoR :: Handler TypedContent
+optionsListMedicoR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
+
 getListMedicoR :: Handler TypedContent
 getListMedicoR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     eMedicos <- runDB $ selectList [] [Asc MedicoId]
     medgetjsons <- mapM createFromMed eMedicos
     sendStatusJSON ok200 (object ["resp" .= medgetjsons])
@@ -208,17 +230,35 @@ getListMedicoR = do
     
 -- ativar / desativar
 
+optionsDesativarMedicoR :: MedicoId -> Handler TypedContent
+optionsDesativarMedicoR _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION, CONTENT-TYPE"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PATCH"
+    sendStatusJSON ok200 (object [])
+
 patchDesativarMedicoR :: MedicoId -> Handler TypedContent
 patchDesativarMedicoR medicoid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION, CONTENT-TYPE"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PATCH"
     _ <- runDB $ get404 medicoid
     runDB $ update medicoid [MedicoAtivo =. False]
     sendStatusJSON ok200 (object ["resp" .= medicoid])
 
+
+optionsAtivarMedicoR :: MedicoId -> Handler TypedContent
+optionsAtivarMedicoR _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION, CONTENT-TYPE"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PATCH"
+    sendStatusJSON ok200 (object [])
     
 patchAtivarMedicoR :: MedicoId -> Handler TypedContent
 patchAtivarMedicoR medicoid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION, CONTENT-TYPE"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PATCH"
     _ <- runDB $ get404 medicoid
     runDB $ update medicoid [MedicoAtivo =. True]
     sendStatusJSON ok200 (object ["resp" .= medicoid])
@@ -251,9 +291,18 @@ instance FromJSON MedAltJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
    
    
+optionsAlterarMedicoR :: MedicoId -> Handler TypedContent
+optionsAlterarMedicoR _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PUT"
+    sendStatusJSON ok200 (object [])   
+   
 putAlterarMedicoR :: MedicoId -> Handler TypedContent
 putAlterarMedicoR medicoid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PUT"
     medico <- runDB $ get404 medicoid
     medjson <- requireJsonBody :: Handler MedAltJSON
     usuid <- return $ medicoUserid medico

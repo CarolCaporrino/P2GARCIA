@@ -31,6 +31,12 @@ instance FromJSON ProntReqJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
    
 
+optionsProntuarioR :: Handler TypedContent
+optionsProntuarioR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
+
 postProntuarioR :: Handler TypedContent
 postProntuarioR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
@@ -80,11 +86,18 @@ instance ToJSON ProntResJSON where
    toJSON = genericToJSON $ aesonPrefix snakeCase
 instance FromJSON ProntResJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
-   
+
+
+optionsSingleProntuarioR :: EntradaProntuarioId -> Handler TypedContent
+optionsSingleProntuarioR  _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
 
 getSingleProntuarioR :: EntradaProntuarioId -> Handler TypedContent
 getSingleProntuarioR prontuarioid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     prontuario <- runDB $ get404 prontuarioid
     prontjson <- return $ createProntGet prontuarioid prontuario
     sendStatusJSON ok200 (object ["resp" .= prontjson])
@@ -104,9 +117,16 @@ createProntGet prontuarioid prontuario =
     
 --GET LIST
 
+optionsListProntuarioR :: Handler TypedContent
+optionsListProntuarioR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
+
 getListProntuarioR :: Handler TypedContent
 getListProntuarioR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     eProntuarios <- runDB $ selectList [] [Asc EntradaProntuarioId]
     prontjsons <- return $ map createProntGetE eProntuarios
     sendStatusJSON created201 (object ["resp" .= prontjsons])
@@ -119,9 +139,16 @@ createProntGetE eProntuario = createProntGet prontuarioid prontuario
     
 --GET PAC
 
+optionsPacProntuarioR :: PacienteId -> Handler TypedContent
+optionsPacProntuarioR  _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    sendStatusJSON ok200 (object [])
+
 getPacProntuarioR :: PacienteId -> Handler TypedContent
 getPacProntuarioR pacienteid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     eProntuarios <- runDB $ selectList [EntradaProntuarioPacienteid ==. pacienteid] [Asc EntradaProntuarioId]
     prontjsons <- return $ map createProntGetE eProntuarios
     sendStatusJSON created201 (object ["resp" .= prontjsons])
@@ -129,9 +156,18 @@ getPacProntuarioR pacienteid = do
     
 --DELETE
 
+optionsApagarProntuarioR :: EntradaProntuarioId -> Handler TypedContent
+optionsApagarProntuarioR  _ = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "DELETE"
+    sendStatusJSON ok200 (object [])
+
 deleteApagarProntuarioR :: EntradaProntuarioId -> Handler TypedContent
 deleteApagarProntuarioR prontuarioid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
+    addHeader "ACCESS-CONTROL-ALLOW-METHODS" "DELETE"
     _ <- runDB $ get404 prontuarioid
     runDB $ delete prontuarioid
     sendStatusJSON ok200 (object ["resp" .= ("Prontuário deletado"::Text)])
