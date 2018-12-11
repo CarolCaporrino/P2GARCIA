@@ -16,6 +16,7 @@ import Handler.Login
 
 
 
+--POST
 
 data ProntReqJSON = ProntReqJSON {
     prontreqPacienteid :: PacienteId,
@@ -61,4 +62,41 @@ createPront agora medid prontuario = do
         entradaProntuarioEspecid        = Nothing,
         entradaProntuarioConteudo       = prontreqConteudo prontuario,
         entradaProntuarioTimestamp      = agora
+    }
+    
+    
+-- GET 1
+
+data ProntResJSON = ProntResJSON {
+    prontresId          :: EntradaProntuarioId,
+    prontresPacienteid  :: PacienteId,
+    prontresMedicoid    :: MedicoId,
+    prontresEspecid     :: Maybe EspecializacaoId,
+    prontresConteudo    :: Text,
+    prontresTimestamp   :: ZonedTime
+} deriving (Show, Read, Generic)
+   
+instance ToJSON ProntResJSON where
+   toJSON = genericToJSON $ aesonPrefix snakeCase
+instance FromJSON ProntResJSON where
+   parseJSON = genericParseJSON $ aesonPrefix snakeCase
+   
+
+getSingleProntuarioR :: EntradaProntuarioId -> Handler TypedContent
+getSingleProntuarioR prontuarioid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    prontuario <- runDB $ get404 prontuarioid
+    prontjson <- return $ createProntGet prontuarioid prontuario
+    sendStatusJSON ok200 (object ["resp" .= prontjson])
+    
+    
+createProntGet :: EntradaProntuarioId -> EntradaProntuario -> ProntResJSON
+createProntGet prontuarioid prontuario = 
+    ProntResJSON {
+        prontresId          = prontuarioid,
+        prontresPacienteid  = entradaProntuarioPacienteid prontuario,
+        prontresMedicoid    = entradaProntuarioMedicoid prontuario,
+        prontresEspecid     = entradaProntuarioEspecid prontuario,
+        prontresConteudo    = entradaProntuarioConteudo prontuario,
+        prontresTimestamp   = utcToZonedTime utc $ entradaProntuarioTimestamp prontuario
     }
