@@ -77,3 +77,10 @@ createMedico usuarioid crm =
         medicoCrm       = crm,
         medicoAtivo     = True
     }
+    
+createEspecMeds :: UTCTime -> MedicoId -> [EspecializacaoId] -> [EspecMedico]
+createEspecMeds agora medicoid especids = 
+    map (\f -> f agora) especsf
+    where
+    cleanEspecMed especid = EspecMedico medicoid especid
+    especsf = map cleanEspecMed especids
