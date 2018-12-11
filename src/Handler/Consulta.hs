@@ -12,6 +12,7 @@ import Database.Persist.Postgresql
 import Data.Time
 import Data.Aeson
 import Data.Aeson.Casing
+import Handler.Login
 
 
 
@@ -46,13 +47,15 @@ postConsultaR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     consjson <- requireJsonBody :: Handler ConsReqJSON
-    _ <- runDB $ get404 $ consreqPacienteid consjson
-    _ <- runDB $ get404 $ consreqMedicoid consjson
-    _ <- runDB $ get404 $ consreqEspecid consjson
-    agora <- liftIO $ getCurrentTime
-    consulta <- return $ createConsulta agora consjson
-    consultaid <- runDB $ insert consulta
-    sendStatusJSON created201 (object ["id" .= consultaid])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1,2,3] $ do
+        _ <- runDB $ get404 $ consreqPacienteid consjson
+        _ <- runDB $ get404 $ consreqMedicoid consjson
+        _ <- runDB $ get404 $ consreqEspecid consjson
+        agora <- liftIO $ getCurrentTime
+        consulta <- return $ createConsulta agora consjson
+        consultaid <- runDB $ insert consulta
+        sendStatusJSON created201 (object ["id" .= consultaid])
     
 
 --Função que pega o tempo de agora e o JSON postado para criar o tipo Consulta (usado no banco)    
@@ -101,9 +104,11 @@ getSingleConsultaR :: ConsultaId -> Handler TypedContent
 getSingleConsultaR consid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
-    consulta <- runDB $ get404 consid
-    consjson <- return $ createConsGet consid consulta
-    sendStatusJSON ok200 (object ["resp" .= consjson])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1,2,3] $ do
+        consulta <- runDB $ get404 consid
+        consjson <- return $ createConsGet consid consulta
+        sendStatusJSON ok200 (object ["resp" .= consjson])
 
 --Função que recebe um id e o tipo Consulta (do banco) para criar o JSON de resposta
 createConsGet :: ConsultaId -> Consulta -> ConsResJSON
@@ -142,9 +147,11 @@ getListConsultaR :: Handler TypedContent
 getListConsultaR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
-    eConsultas <- runDB $ selectList [] [Asc ConsultaId]
-    consjsons <- return $ map createConsGetE eConsultas
-    sendStatusJSON ok200 (object ["resp" .= consjsons])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1,2,3] $ do
+        eConsultas <- runDB $ selectList [] [Asc ConsultaId]
+        consjsons <- return $ map createConsGetE eConsultas
+        sendStatusJSON ok200 (object ["resp" .= consjsons])
     
 
 --GET LIST POR MEDICO
@@ -160,9 +167,11 @@ getMedConsultaR :: MedicoId -> Handler TypedContent
 getMedConsultaR medid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
-    eConsultas <- runDB $ selectList [ConsultaMedicoid ==. medid] [Asc ConsultaId]
-    consjsons <- return $ map createConsGetE eConsultas
-    sendStatusJSON ok200 (object ["resp" .= consjsons])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1,2,3] $ do
+        eConsultas <- runDB $ selectList [ConsultaMedicoid ==. medid] [Asc ConsultaId]
+        consjsons <- return $ map createConsGetE eConsultas
+        sendStatusJSON ok200 (object ["resp" .= consjsons])
     
     
 --DELETE
@@ -181,9 +190,11 @@ deleteApagarConsultaR consid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     addHeader "ACCESS-CONTROL-ALLOW-METHODS" "DELETE"
-    _ <- runDB $ get404 consid
-    runDB $ delete consid
-    sendStatusJSON ok200 (object ["resp" .= ("Consulta deletada"::Text)])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1,2,3] $ do
+        _ <- runDB $ get404 consid
+        runDB $ delete consid
+        sendStatusJSON ok200 (object ["resp" .= ("Consulta deletada"::Text)])
 
 
 
@@ -205,10 +216,12 @@ putAlterarConsultaR consid = do
     addHeader "ACCESS-CONTROL-ALLOW-METHODS" "PUT"
     consulta <- runDB $ get404 consid
     consjson <- requireJsonBody :: Handler ConsReqJSON
-    agora <- liftIO $ getCurrentTime
-    altConsulta <- return $ alterConsulta consjson consulta agora
-    runDB $ replace consid altConsulta
-    sendStatusJSON ok200 (object ["resp" .= ("Consulta alterada"::Text)])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [1,2,3] $ do
+        agora <- liftIO $ getCurrentTime
+        altConsulta <- return $ alterConsulta consjson consulta agora
+        runDB $ replace consid altConsulta
+        sendStatusJSON ok200 (object ["resp" .= ("Consulta alterada"::Text)])
     
 
 --Cria uma Consulta com as informações novas, porém mantendo a data de criação antiga.
