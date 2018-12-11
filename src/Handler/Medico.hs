@@ -136,6 +136,16 @@ instance FromJSON MedResJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
    
 
+--Função que receberá o GET e responderá com o JSON do medico
+getSingleMedicoR :: MedicoId -> Handler TypedContent
+getSingleMedicoR medicoid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    medico <- runDB $ get404 medicoid :: Handler Medico
+    eMedico <- return $ Entity medicoid medico :: Handler (Entity Medico)
+    medgetjson <- createFromMed eMedico
+    sendStatusJSON ok200 (object ["resp" .= medgetjson])
+
+
 createMedGet :: MedicoId -> Usuario -> Medico -> [Entity Especializacao] -> MedResJSON
 createMedGet medicoid usuario medico eEspecs = 
     MedResJSON {
