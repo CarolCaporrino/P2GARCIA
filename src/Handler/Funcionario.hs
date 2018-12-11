@@ -13,6 +13,7 @@ import Data.Time
 import Data.Aeson
 import Data.Aeson.Casing
 import Handler.Login
+import Data.Text as T (pack,unpack,Text)
 
 --POST FUNCIONARIO
 
@@ -202,10 +203,29 @@ getListFuncionarioR :: Handler TypedContent
 getListFuncionarioR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
-    eFuncionarios <- runDB $ selectList [UsuarioTipo !=. "Medico"] [Asc UsuarioId]
+    mNome <- lookupGetParam $ T.pack "nome"
+    mCargo <- lookupGetParam $ T.pack "cargo"
+    nomeFilter <- return $ createFuncFilterNome mNome
+    rgFilter <- return $ createFuncFilterCargo mCargo
+    eFuncionarios <- runDB $ selectList (concat [[UsuarioTipo !=. "Medico"],nomeFilter,rgFilter]) [Asc UsuarioId]
     funjsons <- return $ map createFunGetE eFuncionarios
     sendStatusJSON ok200 (object ["resp" .= funjsons])
-    
+
+
+createFuncFilterNome :: Maybe Text -> [Filter Usuario]
+createFuncFilterNome mNome = 
+    case mNome of
+        Just nome -> [Filter UsuarioNome (Left $ concat ["%", nome, "%"]) (BackendSpecificFilter "ILIKE")]
+        Nothing -> []
+        
+createFuncFilterCargo :: Maybe Text -> [Filter Usuario]
+createFuncFilterCargo mCargo = 
+    case mCargo of
+        Just "1" -> [UsuarioTipo ==. "Admin"]
+        Just "2" -> [UsuarioTipo ==. "Secretaria"]
+        _ -> []
+        
+        
     
 --DELETE FUNCIONARIO
 optionsApagarFuncionarioR :: UsuarioId -> Handler TypedContent
