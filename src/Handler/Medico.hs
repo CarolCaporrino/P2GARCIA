@@ -13,6 +13,7 @@ import Data.Time
 import Data.Aeson
 import Data.Aeson.Casing
 import Handler.Especializacao
+import Handler.Login
 
 --POST
 
@@ -50,23 +51,27 @@ postMedicoR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     medjson <- requireJsonBody :: Handler MedReqJSON
     agora <- liftIO $ getCurrentTime
-    usuario <- return $ createUsuario agora medjson
-    usuid <- runDB $ insert usuario
-    medico <- return $ createMedico usuid $ medreqCrm medjson
-    medid <- runDB $ insert medico
-    especmeds <- return $ createEspecMeds agora medid $ medreqEspecializacoes medjson
-    _ <- mapM insEspecMed especmeds
-    sendStatusJSON created201 (object ["usuarioid" .= usuid, "medicoid" .= medid])
+    mUsuario <- return $ createUsuario agora medjson
+    case mUsuario of
+        Just usuario -> do
+            usuid <- runDB $ insert usuario
+            medico <- return $ createMedico usuid $ medreqCrm medjson
+            medid <- runDB $ insert medico
+            especmeds <- return $ createEspecMeds agora medid $ medreqEspecializacoes medjson
+            _ <- mapM insEspecMed especmeds
+            sendStatusJSON created201 (object ["usuarioid" .= usuid, "medicoid" .= medid])
+        Nothing -> sendStatusJSON badRequest400 (object ["resp" .= ("Inválido"::Text)])
     where
     insEspecMed e = runDB $ insert e :: Handler EspecMedicoId
 
 
 --Função que pega o tempo de agora e o JSON postado para criar o tipo usuario (usado no banco)    
-createUsuario :: UTCTime -> MedReqJSON -> Usuario
+createUsuario :: UTCTime -> MedReqJSON -> Maybe Usuario
 createUsuario agora medjson = do
-    Usuario {
+    senhaHash <- hashPassw $ medreqPassword medjson
+    return $ Usuario {
         usuarioUsername     = medreqUsername medjson,
-        usuarioPassword     = medreqPassword medjson,
+        usuarioPassword     = senhaHash,
         usuarioNome         = medreqNome medjson,
         usuarioCpf          = medreqCpf medjson,
         usuarioRg           = medreqRg medjson,

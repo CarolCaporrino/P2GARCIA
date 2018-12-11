@@ -12,6 +12,7 @@ import Database.Persist.Postgresql
 import Data.Time
 import Data.Aeson
 import Data.Aeson.Casing
+import Handler.Login
 
 --POST FUNCIONARIO
 
@@ -21,9 +22,12 @@ postFuncionarioR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     funjson <- requireJsonBody :: Handler FunReqJSON
     agora <- liftIO $ getCurrentTime
-    funcionario <- return $ createFuncionario agora funjson
-    funcionarioid <- runDB $ insert funcionario
-    sendStatusJSON created201 (object ["id" .= funcionarioid])
+    mFuncionario <- return $ createFuncionario agora funjson
+    case mFuncionario of
+        Nothing -> sendStatusJSON badRequest400 (object ["resp" .= ("Inválido"::Text)])
+        Just funcionario -> do
+            funcionarioid <- runDB $ insert funcionario
+            sendStatusJSON created201 (object ["id" .= funcionarioid])
     
 --Criando o tipo JSON para receber um novo funcionario
 data FunReqJSON = FunReqJSON {
@@ -54,11 +58,12 @@ instance FromJSON FunReqJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
     
 --Função que pega o tempo de agora e o JSON postado para criar o tipo usuario (usado no banco) 
-createFuncionario :: UTCTime -> FunReqJSON -> Usuario
-createFuncionario agora funjson = 
-    Usuario {
+createFuncionario :: UTCTime -> FunReqJSON -> Maybe Usuario
+createFuncionario agora funjson = do
+    senhaHash <- hashPassw $ funreqPassword funjson
+    return $ Usuario {
         usuarioUsername                = funreqUsername funjson,
-        usuarioPassword                = funreqPassword funjson,
+        usuarioPassword                = senhaHash,
         usuarioNome                    = funreqNome funjson,
         usuarioCpf                     = funreqCpf funjson,
         usuarioRg                      = funreqRg funjson,
