@@ -235,6 +235,26 @@ instance ToJSON MedAltJSON where
 instance FromJSON MedAltJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
    
+   
+putAlterarMedicoR :: MedicoId -> Handler TypedContent
+putAlterarMedicoR medicoid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    medico <- runDB $ get404 medicoid
+    medjson <- requireJsonBody :: Handler MedAltJSON
+    usuid <- return $ medicoUserid medico
+    usuario <- runDB $ get404 usuid
+    agora <- liftIO $ getCurrentTime
+    altUsuario <- return $ createAltUsu agora medjson usuario
+    altMedico <- return $ createAltMed usuid medjson medico
+    runDB $ deleteWhere [EspecMedicoMedicoid ==. medicoid]
+    especmeds <- return $ createEspecMeds agora medicoid $ medaltEspecializacoes medjson
+    runDB $ replace usuid altUsuario
+    runDB $ replace medicoid altMedico
+    _ <- mapM insEspecMed especmeds
+    sendStatusJSON ok200 (object ["resp" .= medicoid])
+    where
+    insEspecMed e = runDB $ insert e :: Handler EspecMedicoId
+   
 
 createAltUsu :: UTCTime -> MedAltJSON -> Usuario -> Usuario
 createAltUsu agora medjson usu =
