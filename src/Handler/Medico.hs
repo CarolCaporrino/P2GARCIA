@@ -134,3 +134,33 @@ instance ToJSON MedResJSON where
    toJSON = genericToJSON $ aesonPrefix snakeCase
 instance FromJSON MedResJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
+   
+
+createMedGet :: MedicoId -> Usuario -> Medico -> [Entity Especializacao] -> MedResJSON
+createMedGet medicoid usuario medico eEspecs = 
+    MedResJSON {
+        medresId                = medicoid,
+        medresUsername          = usuarioUsername usuario,
+        medresNome              = usuarioNome usuario,
+        medresCpf               = usuarioCpf usuario,
+        medresRg                = usuarioRg usuario,
+        medresCrm               = medicoCrm medico,
+        medresNasc              = usuarioNasc usuario,
+        medresEspecializacoes   = map createEspecJSONe eEspecs,
+        medresTelefone          = usuarioTelefone usuario,
+        medresCelular           = usuarioCelular usuario,
+        medresEmail             = usuarioEmail usuario,
+        medresCep               = usuarioCep usuario,
+        medresEstado            = usuarioEstado usuario,
+        medresCidade            = usuarioCidade usuario,
+        medresBairro            = usuarioBairro usuario,
+        medresLogradouro        = usuarioLogradouro usuario,
+        medresNumero            = usuarioNumero usuario,
+        medresComplemento       = usuarioComplemento usuario,
+        medresAtivo             = medicoAtivo medico,
+        medresInsertedTimestamp     = istamp,
+        medresLastUpdatedTimestamp  = ustamp
+    }
+    where
+    istamp = utcToZonedTime utc $ usuarioInsertedTimestamp usuario
+    ustamp = utcToZonedTime utc $ usuarioLastUpdatedTimestamp usuario
