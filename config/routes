@@ -38,4 +38,6 @@
 /espec/list     ListEspecR  GET OPTIONS
 /espec/#EspecializacaoId/id     SingleEspecializacaoR   GET OPTIONS
 
+/resetarsenha/#Text/usuario     RedefinirSenhaR     PATCH OPTIONS
+
 /login                          LoginR              POST

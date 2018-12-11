@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 94b6d8818c761632fe88fd6aee76cdbf8dff2ab6311129c31251b87eedf2aa75
+-- hash: ad022d87c226173a9b6f7603f89c8be3c45814a55c984bfe626dbceacebab10d
 
 name:           trab-p2
 version:        0.0.0
@@ -32,6 +32,7 @@ library
       Handler.Medico
       Handler.Paciente
       Handler.Prontuario
+      Handler.Senha
       Import
       Import.NoFoundation
       Model
