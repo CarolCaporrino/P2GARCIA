@@ -14,6 +14,8 @@ import Data.Aeson
 import Data.Aeson.Casing
 import Handler.Especializacao
 import Handler.Login
+import Data.Text as T (pack,unpack,Text)
+import Text.Read (readMaybe)
 
 --POST
 
@@ -223,9 +225,38 @@ getListMedicoR :: Handler TypedContent
 getListMedicoR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
-    eMedicos <- runDB $ selectList [] [Asc MedicoId]
-    medgetjsons <- mapM createFromMed eMedicos
+    mNome <- lookupGetParam $ T.pack "nome"
+    mEspec <- lookupGetParam $ T.pack "especializacao"
+    nomeFilter <- return $ createMedFilterNome mNome
+    especFilter <- return $ createMedFilterEspec mEspec
+    
+    eUsuarios <- runDB $ selectList ([UsuarioTipo ==. "Medico"]++nomeFilter) [Asc UsuarioId]
+    usuarioids <- return $ map entityKey eUsuarios
+    
+    eMedicos <- runDB $ selectList [MedicoUserid <-. usuarioids, MedicoAtivo ==. True] [Asc MedicoId]
+    medicoids <- return $ map entityKey eMedicos
+    
+    eEspecmedics <- runDB $ selectList ([EspecMedicoMedicoid <-. medicoids]++especFilter) [Asc EspecMedicoId]
+    medicoids' <- return $ map (\eem -> especMedicoMedicoid $ entityVal eem) eEspecmedics
+    
+    eMedicos' <- runDB $ selectList [MedicoId <-. medicoids'] [Asc MedicoId]
+    
+    medgetjsons <- mapM createFromMed eMedicos'
     sendStatusJSON ok200 (object ["resp" .= medgetjsons])
+    
+createMedFilterNome :: Maybe Text -> [Filter Usuario]
+createMedFilterNome mNome = 
+    case mNome of
+        Just nome -> [Filter UsuarioNome (Left $ concat ["%", nome, "%"]) (BackendSpecificFilter "ILIKE")]
+        Nothing -> []
+        
+createMedFilterEspec :: Maybe Text -> [Filter EspecMedico]
+createMedFilterEspec mEspec = 
+    case mEspec of
+        Just espec -> case (readMaybe $ T.unpack espec :: Maybe Int64) of
+            Just especint -> [EspecMedicoEspecid ==. (toSqlKey especint)]
+            Nothing -> []
+        Nothing -> []
     
     
 -- ativar / desativar
