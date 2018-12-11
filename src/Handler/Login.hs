@@ -24,6 +24,42 @@ import Jose.Jwa
 import Jose.Jwt
 
 
+jwtAll :: (Maybe T.Text) -> Handler (Maybe JwtJSON)
+jwtAll mjwt = do
+    case mjwt of
+        Just jwt -> do
+            eitherJwt <- return $ hmacDecode jwtKey $ BSC.pack $ T.unpack jwt
+            case eitherJwt of
+                Right jwtr -> do
+                    maybeJwtinfo <- return $ Data.Aeson.decode $ BSL.fromStrict $ snd jwtr :: Handler (Maybe JwtJSON)
+                    case maybeJwtinfo of
+                        Just jwtinfo -> do
+                            expdate <- return $ jwjExp jwtinfo
+                            validoData <- liftIO $ checkDate expdate
+                            validoUsu <- checkUsuario $ jwjId jwtinfo
+                            --valido <- return $ True
+                            if (validoData && validoUsu) then 
+                                return $ Just $ jwtinfo
+                            else
+                                return $ Nothing
+                        Nothing -> return $ Nothing
+                Left _ -> return $ Nothing
+        Nothing -> return $ Nothing
+        
+checkUsuario :: UsuarioId -> Handler Bool
+checkUsuario usuid = do
+    musu <- runDB $ get usuid
+    case musu of
+        Just _ -> return $ True
+        Nothing -> return $ False
+
+checkDate :: POSIXTime -> IO Bool
+checkDate expdate = do
+    expire <- return $ posixSecondsToUTCTime expdate
+    now <- getCurrentTime
+    return (expire >= now)
+
+
 hashPassw :: T.Text -> Maybe T.Text
 hashPassw pass = do 
     bsPass <- hashPassword (BSC.pack $ T.unpack pass) (BSC.pack "$2y$04$kqhhCdZNU8A3CW0s4zPKGeqRSAAk9Oj/C/sK.U9YxhLak258QNfIK")

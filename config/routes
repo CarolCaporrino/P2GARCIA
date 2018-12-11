@@ -27,3 +27,5 @@
 /medico/#MedicoId/ativar        AtivarMedicoR       PATCH
 /medico/#MedicoId/desativar     DesativarMedicoR    PATCH
 /medico/#MedicoId/alterar       AlterarMedicoR      PUT
+
+/login                          LoginR              POST
