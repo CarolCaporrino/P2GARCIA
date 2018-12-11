@@ -16,7 +16,7 @@ import Data.Aeson.Casing
 
 --POST
 
---Criando o tipo JSON para receber um novo paciente
+--Criando o tipo JSON para receber um novo medico
 data MedReqJSON = MedReqJSON {
     medreqUsername          :: Text,
     medreqPassword          :: Text,
@@ -42,3 +42,30 @@ instance ToJSON MedReqJSON where
    toJSON = genericToJSON $ aesonPrefix snakeCase
 instance FromJSON MedReqJSON where
    parseJSON = genericParseJSON $ aesonPrefix snakeCase
+   
+
+--Função que pega o tempo de agora e o JSON postado para criar o tipo usuario (usado no banco)    
+createUsuario :: UTCTime -> MedReqJSON -> Usuario
+createUsuario agora medjson = do
+    Usuario {
+        usuarioUsername     = medreqUsername medjson,
+        usuarioPassword     = medreqPassword medjson,
+        usuarioNome         = medreqNome medjson,
+        usuarioCpf          = medreqCpf medjson,
+        usuarioRg           = medreqRg medjson,
+        usuarioNasc         = medreqNasc medjson,
+        usuarioTipo         = "Medico",
+        usuarioTelefone     = medreqTelefone medjson,
+        usuarioCelular      = medreqCelular medjson,
+        usuarioEmail        = medreqEmail medjson,
+        usuarioPais         = "BR",
+        usuarioCep          = medreqCep medjson,
+        usuarioEstado       = medreqEstado medjson,
+        usuarioCidade       = medreqCidade medjson,
+        usuarioBairro       = medreqBairro medjson,
+        usuarioLogradouro   = medreqLogradouro medjson,
+        usuarioNumero       = medreqNumero medjson,
+        usuarioComplemento  = medreqComplemento medjson,
+        usuarioInsertedTimestamp        = agora,
+        usuarioLastUpdatedTimestamp     = agora
+    }
