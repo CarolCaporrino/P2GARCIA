@@ -69,3 +69,11 @@ createUsuario agora medjson = do
         usuarioInsertedTimestamp        = agora,
         usuarioLastUpdatedTimestamp     = agora
     }
+    
+createMedico :: UsuarioId -> Text -> Medico
+createMedico usuarioid crm =
+    Medico {
+        medicoUserid    = usuarioid,
+        medicoCrm       = crm,
+        medicoAtivo     = True
+    }
