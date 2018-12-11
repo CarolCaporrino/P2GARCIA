@@ -189,3 +189,21 @@ createFromMed eMedico = do
     return $ medgetjson
     where
     espec emid = Entity (emid) <$> (runDB $ get404 emid) :: Handler (Entity Especializacao)
+    
+    
+-- ativar / desativar
+
+patchDesativarMedicoR :: MedicoId -> Handler TypedContent
+patchDesativarMedicoR medicoid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    _ <- runDB $ get404 medicoid
+    runDB $ update medicoid [MedicoAtivo =. False]
+    sendStatusJSON ok200 (object ["resp" .= medicoid])
+
+    
+patchAtivarMedicoR :: MedicoId -> Handler TypedContent
+patchAtivarMedicoR medicoid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    _ <- runDB $ get404 medicoid
+    runDB $ update medicoid [MedicoAtivo =. True]
+    sendStatusJSON ok200 (object ["resp" .= medicoid])
