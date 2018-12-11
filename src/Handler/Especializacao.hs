@@ -51,3 +51,30 @@ createEspecs agora es =
     where
     cleanEspec e = Especializacao (especNome e)
     especsf = map cleanEspec es
+    
+--GET ESPEC
+
+getSingleEspecializacaoR :: EspecializacaoId -> Handler TypedContent
+getSingleEspecializacaoR especid = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    espec <- runDB $ get404 especid
+    especjson <- return $ createEspecJSON especid espec
+    sendStatusJSON ok200 (object ["resp" .= especjson])
+    
+createEspecJSON :: EspecializacaoId -> Especializacao -> EspecJSON
+createEspecJSON especid espec =
+    EspecJSON especid (especializacaoNome espec) Nothing
+
+
+getListEspecR :: Handler TypedContent
+getListEspecR = do
+    addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
+    especs <- runDB $ selectList [] [Asc EspecializacaoId]
+    especsjson <- return $ map createEspecJSONe especs
+    sendStatusJSON ok200 (object ["resp" .= especsjson])
+    
+createEspecJSONe :: Entity Especializacao -> EspecJSON
+createEspecJSONe e = createEspecJSON especid espec
+    where
+    especid = entityKey e
+    espec = entityVal e
