@@ -15,6 +15,7 @@ import Data.Aeson.Casing
 import Handler.Login
 import Data.Text as T (pack,unpack,Text)
 import Handler.Login
+import Handler.Validation
 
 --POST FUNCIONARIO
 
@@ -74,13 +75,14 @@ instance FromJSON FunReqJSON where
 createFuncionario :: UTCTime -> FunReqJSON -> Maybe Usuario
 createFuncionario agora funjson = do
     senhaHash <- hashPassw $ funreqPassword funjson
+    cargo <- intToCargo $ funreqCargo funjson
     return $ Usuario {
         usuarioUsername                = funreqUsername funjson,
         usuarioPassword                = senhaHash,
         usuarioNome                    = funreqNome funjson,
         usuarioCpf                     = funreqCpf funjson,
         usuarioRg                      = funreqRg funjson,
-        usuarioTipo                    = cleanTipo,
+        usuarioTipo                    = cargo,
         usuarioNasc                    = funreqNasc funjson,
         usuarioTelefone                = funreqTelefone funjson,
         usuarioCelular                 = funreqCelular funjson,
@@ -96,11 +98,6 @@ createFuncionario agora funjson = do
         usuarioInsertedTimestamp       = agora,
         usuarioLastUpdatedTimestamp    = agora
     }
-    where
-    cleanTipo = case (funreqCargo funjson) of
-        1 -> "Admin"        :: Text
-        2 -> "Secretaria"   :: Text
-        _ -> "Secretaria"   :: Text
         
         
 --GET 1 FUNCIONARIO
@@ -164,7 +161,7 @@ createFunGet funcid usu =
         funresCpf           = usuarioCpf usu,
         funresRg            = usuarioRg usu,
         funresNasc          = usuarioNasc usu,
-        funresCargo         = tipo,
+        funresCargo         = cargoToInt $ usuarioTipo usu,
         funresTelefone      = usuarioTelefone usu,
         funresCelular       = usuarioCelular usu,
         funresEmail         = usuarioEmail usu,
@@ -181,10 +178,6 @@ createFunGet funcid usu =
     where
     istamp = utcToZonedTime utc $ usuarioInsertedTimestamp usu
     ustamp = utcToZonedTime utc $ usuarioLastUpdatedTimestamp usu
-    tipo = case (usuarioTipo usu) of
-        "Admin" -> 1
-        "Secretaria" -> 2
-        _ -> 2
 
 --GET LIST
 
@@ -305,20 +298,24 @@ putAlterarFuncionarioR usuid = do
             sendStatusJSON badRequest400 (object ["resp" .= ("Não é funcionário"::Text)])
         else do
             agora <- liftIO $ getCurrentTime
-            altFuncionario <- return $ alterFuncionario funjson usuario agora 
-            runDB $ replace usuid altFuncionario
-            sendStatusJSON ok200 (object ["resp" .= ("Funcionario alterado"::Text)])
+            mAltFuncionario <- return $ alterFuncionario funjson usuario agora
+            case mAltFuncionario of
+                Nothing -> sendStatusJSON badRequest400 (object ["resp" .= ("Inválido"::Text)])
+                Just altFuncionario -> do
+                    runDB $ replace usuid altFuncionario
+                    sendStatusJSON ok200 (object ["resp" .= ("Funcionario alterado"::Text)])
    
 --Cria um Usuario com as informações novas, porém mantendo a data de criação, o username e a senha antigos.
-alterFuncionario :: FunAltJSON -> Usuario -> UTCTime -> Usuario
-alterFuncionario funjson usuario agora = 
-    Usuario {
+alterFuncionario :: FunAltJSON -> Usuario -> UTCTime -> Maybe Usuario
+alterFuncionario funjson usuario agora = do
+    cargo <- intToCargo $ funaltCargo funjson
+    return $ Usuario {
         usuarioUsername             = usuarioUsername usuario,
         usuarioPassword             = usuarioPassword usuario,
         usuarioNome                 = funaltNome funjson,
         usuarioCpf                  = funaltCpf funjson,
         usuarioRg                   = funaltRg funjson,
-        usuarioTipo                 = cleanTipo,
+        usuarioTipo                 = cargo,
         usuarioNasc                 = funaltNasc funjson,
         usuarioTelefone             = funaltTelefone funjson,
         usuarioCelular              = funaltCelular funjson,
@@ -334,8 +331,3 @@ alterFuncionario funjson usuario agora =
         usuarioInsertedTimestamp    = usuarioInsertedTimestamp usuario,
         usuarioLastUpdatedTimestamp = agora
     }
-    where
-    cleanTipo = case (funaltCargo funjson) of
-        1 -> "Admin"        :: Text
-        2 -> "Secretaria"   :: Text
-        _ -> "Secretaria"   :: Text

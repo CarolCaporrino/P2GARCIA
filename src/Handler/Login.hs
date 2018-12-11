@@ -22,6 +22,7 @@ import Data.Time.Clock.POSIX
 import Jose.Jws
 import Jose.Jwa
 import Jose.Jwt
+import Handler.Validation
 
 
 execJwt :: (Maybe T.Text) -> [Int] -> Handler TypedContent -> Handler TypedContent
@@ -136,7 +137,7 @@ postLoginR = do
             bpssword <- return $ BSC.pack $ T.unpack lpssword
             hpssword <- return $ BSC.pack $ T.unpack $ usuarioPassword $ entityVal eusuario
             if (validatePassword hpssword bpssword && isAtivo) then do
-                tipo <- return $ tipoInt $ usuarioTipo $ entityVal eusuario
+                tipo <- return $ tipoToInt $ usuarioTipo $ entityVal eusuario
                 username <- return $ usuarioUsername $ entityVal eusuario
                 usuarioid <- return $ entityKey eusuario
                 nome <- return $ usuarioNome $ entityVal eusuario
@@ -155,10 +156,6 @@ postLoginR = do
         Nothing -> do
             sendStatusJSON unauthorized401 (object ["resp" .= T.pack "Usuário Inválido"])
     where
-    tipoInt tp = case tp of
-        "Admin"         -> 1
-        "Secretaria"    -> 2
-        "Medico"        -> 3
     maybeBool (Just True) = True
     maybeBool (Just False) = False
     maybeBool Nothing = True
