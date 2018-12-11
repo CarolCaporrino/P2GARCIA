@@ -207,3 +207,30 @@ patchAtivarMedicoR medicoid = do
     _ <- runDB $ get404 medicoid
     runDB $ update medicoid [MedicoAtivo =. True]
     sendStatusJSON ok200 (object ["resp" .= medicoid])
+    
+    
+--PUT
+
+data MedAltJSON = MedAltJSON {
+    medaltNome              :: Text,
+    medaltCpf               :: Text,
+    medaltRg                :: Text,
+    medaltCrm               :: Text,
+    medaltNasc              :: Day,
+    medaltEspecializacoes   :: [EspecializacaoId],
+    medaltTelefone          :: Maybe Text,
+    medaltCelular           :: Maybe Text,
+    medaltEmail             :: Text,
+    medaltCep               :: Text,
+    medaltEstado            :: Text,
+    medaltCidade            :: Text,
+    medaltBairro            :: Text,
+    medaltLogradouro        :: Text,
+    medaltNumero            :: Text,
+    medaltComplemento       :: Maybe Text
+} deriving (Show, Read, Generic)
+
+instance ToJSON MedAltJSON where
+   toJSON = genericToJSON $ aesonPrefix snakeCase
+instance FromJSON MedAltJSON where
+   parseJSON = genericParseJSON $ aesonPrefix snakeCase
