@@ -12,7 +12,7 @@ import Database.Persist.Postgresql
 import Data.Time
 import Data.Aeson
 import Data.Aeson.Casing
-
+import Handler.Especializacao
 
 --POST
 
@@ -101,3 +101,36 @@ createEspecMeds agora medicoid especids =
     where
     cleanEspecMed especid = EspecMedico medicoid especid
     especsf = map cleanEspecMed especids
+    
+    
+--GET 1
+    
+--Criando o tipo JSON que mandará o medico selecionado para o front    
+data MedResJSON = MedResJSON {
+    medresId                :: MedicoId,
+    medresUsername          :: Text,
+    medresNome              :: Text,
+    medresCpf               :: Text,
+    medresRg                :: Text,
+    medresCrm               :: Text,
+    medresNasc              :: Day,
+    medresEspecializacoes   :: [EspecJSON],
+    medresTelefone          :: Maybe Text,
+    medresCelular           :: Maybe Text,
+    medresEmail             :: Text,
+    medresCep               :: Text,
+    medresEstado            :: Text,
+    medresCidade            :: Text,
+    medresBairro            :: Text,
+    medresLogradouro        :: Text,
+    medresNumero            :: Text,
+    medresComplemento       :: Maybe Text,
+    medresAtivo             :: Bool,
+    medresInsertedTimestamp     :: ZonedTime,
+    medresLastUpdatedTimestamp  :: ZonedTime
+} deriving (Show, Read, Generic)
+
+instance ToJSON MedResJSON where
+   toJSON = genericToJSON $ aesonPrefix snakeCase
+instance FromJSON MedResJSON where
+   parseJSON = genericParseJSON $ aesonPrefix snakeCase
