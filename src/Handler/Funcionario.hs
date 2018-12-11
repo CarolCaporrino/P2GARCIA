@@ -39,7 +39,7 @@ postFuncionarioR = do
             Nothing -> sendStatusJSON badRequest400 (object ["resp" .= ("Inválido"::Text)])
             Just funcionario -> do
                 funcionarioid <- runDB $ insert funcionario
-                sendStatusJSON created201 (object ["id" .= funcionarioid])
+                sendStatusJSON created201 (object ["resp" .= funcionarioid])
     
 --Criando o tipo JSON para receber um novo funcionario
 data FunReqJSON = FunReqJSON {

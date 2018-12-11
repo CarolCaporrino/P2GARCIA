@@ -62,8 +62,7 @@ postPacienteR = do
         agora <- liftIO $ getCurrentTime
         paciente <- return $ createPaciente agora pacjson
         pacienteid <- runDB $ insert paciente
-        sendStatusJSON created201 (object ["id" .= pacienteid])
-    
+        sendStatusJSON created201 (object ["resp" .= pacienteid])
 
 --Função que pega o tempo de agora e o JSON postado para criar o tipo paciente (usado no banco)    
 createPaciente :: UTCTime -> PacReqJSON -> Paciente

@@ -98,9 +98,11 @@ getSingleProntuarioR :: EntradaProntuarioId -> Handler TypedContent
 getSingleProntuarioR prontuarioid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
-    prontuario <- runDB $ get404 prontuarioid
-    prontjson <- return $ createProntGet prontuarioid prontuario
-    sendStatusJSON ok200 (object ["resp" .= prontjson])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [3] $ do
+        prontuario <- runDB $ get404 prontuarioid
+        prontjson <- return $ createProntGet prontuarioid prontuario
+        sendStatusJSON ok200 (object ["resp" .= prontjson])
     
     
 createProntGet :: EntradaProntuarioId -> EntradaProntuario -> ProntResJSON
@@ -127,9 +129,11 @@ getListProntuarioR :: Handler TypedContent
 getListProntuarioR = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
-    eProntuarios <- runDB $ selectList [] [Asc EntradaProntuarioId]
-    prontjsons <- return $ map createProntGetE eProntuarios
-    sendStatusJSON created201 (object ["resp" .= prontjsons])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [3] $ do
+        eProntuarios <- runDB $ selectList [] [Asc EntradaProntuarioId]
+        prontjsons <- return $ map createProntGetE eProntuarios
+        sendStatusJSON created201 (object ["resp" .= prontjsons])
     
 createProntGetE :: Entity EntradaProntuario -> ProntResJSON
 createProntGetE eProntuario = createProntGet prontuarioid prontuario
@@ -149,9 +153,11 @@ getPacProntuarioR :: PacienteId -> Handler TypedContent
 getPacProntuarioR pacienteid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
-    eProntuarios <- runDB $ selectList [EntradaProntuarioPacienteid ==. pacienteid] [Asc EntradaProntuarioId]
-    prontjsons <- return $ map createProntGetE eProntuarios
-    sendStatusJSON created201 (object ["resp" .= prontjsons])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [3] $ do
+        eProntuarios <- runDB $ selectList [EntradaProntuarioPacienteid ==. pacienteid] [Asc EntradaProntuarioId]
+        prontjsons <- return $ map createProntGetE eProntuarios
+        sendStatusJSON created201 (object ["resp" .= prontjsons])
   
     
 --DELETE
@@ -168,6 +174,8 @@ deleteApagarProntuarioR prontuarioid = do
     addHeader "ACCESS-CONTROL-ALLOW-ORIGIN" "*"
     addHeader "ACCESS-CONTROL-ALLOW-HEADERS" "AUTHORIZATION"
     addHeader "ACCESS-CONTROL-ALLOW-METHODS" "DELETE"
-    _ <- runDB $ get404 prontuarioid
-    runDB $ delete prontuarioid
-    sendStatusJSON ok200 (object ["resp" .= ("Prontuário deletado"::Text)])
+    mBearer <- lookupBearerAuth
+    execJwt mBearer [3] $ do
+        _ <- runDB $ get404 prontuarioid
+        runDB $ delete prontuarioid
+        sendStatusJSON ok200 (object ["resp" .= ("Prontuário deletado"::Text)])
